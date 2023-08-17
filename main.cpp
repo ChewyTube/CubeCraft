@@ -27,9 +27,12 @@
 
 #include "Source/Utils/GetTimeStamp.h"
 #include "Source/Camera.h"
+#include "Source/KeyboardInput.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
+
+const int SIGHT_DISTANCE_CHUNK = 32;
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -128,10 +131,10 @@ const std::vector<Vertex> vertices = {
     {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
     {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},//œ¬Y-
 
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},//◊ÛX-
+    {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
+    {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f}},
+    {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},//◊ÛX-
 
     {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f}},
     {{0.5f, 0.5f, 0.5f},{1.0f, 1.0f}},
@@ -180,6 +183,8 @@ public:
 
 private:
     GLFWwindow* window;
+
+    keyboardInput kbd;
 
     double startTimeStamp = getTimeStamp_us();
     double endTimeStamp = 0;
@@ -247,6 +252,8 @@ private:
 
     float deltaTime, lastFrame;
     
+    int cursorDisplay = 0;
+    bool cursorDisplayChange = false;
 
     void initWindow() {
         glfwInit();
@@ -255,7 +262,10 @@ private:
 
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 
+        
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        
+        
 
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
@@ -338,6 +348,18 @@ private:
             lastFrame = currentFrame;
 
             processInput(window);
+
+            if (cursorDisplayChange) {
+                if (cursorDisplay) {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+                else {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                }
+                cursorDisplayChange = false;
+            }
+            
+
             glfwPollEvents();
             drawFrame();
         }
@@ -1388,7 +1410,7 @@ private:
         UniformBufferObject ubo{};
         ubo.model = glm::mat4(1.0f);
         ubo.view  = camera.GetViewMatrix();
-        ubo.proj  = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+        ubo.proj  = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, (float)SIGHT_DISTANCE_CHUNK * 16);
         ubo.proj[1][1] *= -1;
 
         memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -1696,8 +1718,7 @@ private:
     //º¸≈Ã ‰»Î
     void processInput(GLFWwindow* window)
     {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
             glfwSetWindowShouldClose(window, true);
         }
 
@@ -1714,6 +1735,15 @@ private:
             camera.ProcessKeyboard(UPWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             camera.ProcessKeyboard(DOWNWARD, deltaTime);
+
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            kbd.P_Pressed();
+        }
+        if ((glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) and (kbd.Is_P_Pressed == true)) {
+            cursorDisplay = (cursorDisplay + 1) % 2;
+            cursorDisplayChange = true;
+            kbd.P_Released();
+        }
     }
     
     
