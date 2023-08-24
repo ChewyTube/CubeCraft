@@ -49,7 +49,6 @@ namespace cubecraft{
 		~Context();
 
 		void InitVulkan(GLFWwindow* window);
-		void MainLoop(GLFWwindow* window);
 		void QuitVulkan();
 
 
@@ -59,12 +58,20 @@ namespace cubecraft{
 		VkSurfaceKHR surface;//表面
 		vk::PhysicalDevice phyDevice;//物理设备
 		QueueFamilyIndecis queueFamilyIndecis;
+
 		std::unique_ptr<SwapChain> swapChain;
+		std::unique_ptr<RenderProcess> renderProcess;
 
 		bool fiestTime = true;
-	private:
+
 		Context(GLFWwindow* window);
-		static std::unique_ptr<Context> instance_;
+		Context(int tmp);
+		Context();
+
+		//------------------------Shader.cpp------------------------
+		void createShader(const std::string& vertSource, const std::string& fragSource);
+	private:
+		static Context *instance_;
 
 		//RenderProcess renderProcess;
 
@@ -85,7 +92,7 @@ namespace cubecraft{
 
 		std::vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
 
-		std::unique_ptr<RenderProcess> renderProcess;
+		
 
 		//------------------------Context.cpp------------------------
 		void createInstance();
@@ -98,14 +105,6 @@ namespace cubecraft{
 		//------------------------Layers.cpp------------------------
 		void getLayers();
 
-		//------------------------SwapChain.cpp------------------------
-		void createSwapChain();
-		void queryswapchainInfo();
-		void getImages();
-		void createImageViews();
-
-		//------------------------Shader.cpp------------------------
-		void createShader(const std::string& vertSource, const std::string& fragSource);
-		void destroyShader();
+		
 	};
 }

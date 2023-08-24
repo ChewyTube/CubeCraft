@@ -3,14 +3,15 @@
 #include <vector>
 
 namespace cubecraft {
-	std::unique_ptr<Context> Context::instance_(nullptr);
+	Context* Context::instance_ = nullptr;
 	
 	void Context::Init(GLFWwindow* window) {
-		instance_.reset(new Context(window));
-		std::cout << "成功创建类实例：" << instance_;
+		instance_ = new Context();
+		std::cout << "成功创建类实例：" << instance_ << std::endl;
 	}
 	void Context::Quit() {
-		instance_.reset();
+		delete instance_;
+		instance_ = nullptr;
 	}
 	
 	Context::Context(GLFWwindow* window) {
@@ -19,27 +20,30 @@ namespace cubecraft {
 		//std::cout << instance_;
 		InitVulkan(window);
 	}
+	Context::Context(){
+		createInstance();
+	}
+	Context::Context(int tmp) {
+		;
+	}
 	Context::~Context() {
 		QuitVulkan();
 	}
 
 	void Context::InitVulkan(GLFWwindow* window) {
-		createInstance();
 		if (showAvailableLayers)getLayers();
 		pickupPhyicalDevice();
 		createSurface(window);
 		queryQueueFamilyIndecis();
 		createDevice();
 		getQueues();
-		swapChain.reset(new SwapChain());
+		//swapChain.reset(new SwapChain());
 		//createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
-		//renderProcess->InitPipeline();
 	}
 	
 	void Context::QuitVulkan() {
-		destroyShader();
+		Context::GetInstance().renderProcess.reset();
 		device.destroy();
-		vkDestroySurfaceKHR(instance, surface, nullptr);
 		instance.destroy();
 	}
 	

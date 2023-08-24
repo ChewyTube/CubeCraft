@@ -31,9 +31,12 @@ namespace cubecraft {
 
 		swapchain = Context::GetInstance().device.createSwapchainKHR(createInfo);
 	}
-	SwapChain::~SwapChain() {
+	void SwapChain::DestroySwapChain(){
 		for (auto& view : imageViews) {
 			Context::GetInstance().device.destroyImageView(view);
+		}
+		for (auto& framebuffer : framebuffers) {
+			Context::GetInstance().device.destroyFramebuffer(framebuffer);
 		}
 		Context::GetInstance().device.destroySwapchainKHR(swapchain);
 	}
@@ -100,6 +103,19 @@ namespace cubecraft {
 				.setSubresourceRange(range);
 
 			imageViews[i] = Context::GetInstance().device.createImageView(createInfo);
+		}
+	}
+	void SwapChain::createFrameBuffers() {
+		framebuffers.resize(images.size());
+		for (int i = 0; i < framebuffers.size(); i++) {
+			vk::FramebufferCreateInfo createInfo;
+			createInfo.setAttachments(imageViews[i]);
+			createInfo.setWidth(WIDTH);
+			createInfo.setHeight(HEIGHT);
+			createInfo.setRenderPass(Context::GetInstance().renderProcess->renderPass);
+			createInfo.setLayers(1);
+
+			framebuffers[i] = Context::GetInstance().device.createFramebuffer(createInfo);
 		}
 	}
 }

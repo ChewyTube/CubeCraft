@@ -35,7 +35,7 @@ namespace cubecraft {
 		vertexShaderStage.setModule(Context::GetInstance().vertexModule);
 		vertexShaderStage.setPName("main");
 		vk::PipelineShaderStageCreateInfo fragmentShaderStage;
-		fragmentShaderStage.setStage(vk::ShaderStageFlagBits::eVertex);
+		fragmentShaderStage.setStage(vk::ShaderStageFlagBits::eFragment);
 		fragmentShaderStage.setModule(Context::GetInstance().fragmentModule);
 		fragmentShaderStage.setPName("main");
 		auto stages = { vertexShaderStage, fragmentShaderStage };
@@ -62,6 +62,7 @@ namespace cubecraft {
 		vk::PipelineMultisampleStateCreateInfo multState;
 		multState.setSampleShadingEnable(false);
 		multState.setRasterizationSamples(vk::SampleCountFlagBits::e1);
+		createInfo.setPMultisampleState(&multState);
 
 		//7.模板测试 深度测试
 		;
@@ -76,19 +77,68 @@ namespace cubecraft {
 			vk::ColorComponentFlagBits::eB |
 			vk::ColorComponentFlagBits::eA);
 		blendState.setLogicOpEnable(false);
+		blendState.setLogicOp(vk::LogicOp::eCopy);
+		blendState.setAttachmentCount(1);
 		blendState.setAttachments(attachState);
-		auto result = Context::GetInstance().device.createGraphicsPipeline(nullptr,createInfo);
+		createInfo.setPColorBlendState(&blendState);
+
+		//9.渲染流程
+		createInfo.setRenderPass(renderPass);
+		createInfo.setLayout(layout);
+
+		//std::cout << Context::GetInstance().device << std::endl;
+		auto result = Context::GetInstance().device.createGraphicsPipeline(nullptr, createInfo);
 		if (result.result != vk::Result::eSuccess) {
 			throw std::runtime_error("创建渲染管线失败");
         }
 		std::cout << "成功创建渲染管线\n";
 		pipeline = result.value;
 	}
-
-	RenderProcess* RenderProcess::GetRenderProcess() {
-		return this;
+	void RenderProcess::InitLayout() {
+		vk::PipelineLayoutCreateInfo createInfo;
+		layout = Context::GetInstance().device.createPipelineLayout(createInfo);
 	}
+	void RenderProcess::InitRenderPass() {
+		vk::RenderPassCreateInfo createInfo;
+
+		vk::AttachmentDescription attachDescr;
+		vk::SubpassDescription subpass;
+		vk::AttachmentReference reference;
+		vk::SubpassDependency dependency;
+
+		attachDescr.setFormat(Context::GetInstance().swapChain->swapchainInfo.imageFormat.format);
+		attachDescr.setInitialLayout(vk::ImageLayout::eUndefined);
+		attachDescr.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+		attachDescr.setLoadOp(vk::AttachmentLoadOp::eClear);
+		attachDescr.setStoreOp(vk::AttachmentStoreOp::eStore);
+		attachDescr.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+		attachDescr.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+		attachDescr.setSamples(vk::SampleCountFlagBits::e1);
+
+		reference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+		reference.setAttachment(0);
+
+		subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics);
+		subpass.setColorAttachments(reference);
+
+		dependency.setSrcSubpass(VK_SUBPASS_EXTERNAL);
+		dependency.setDstSubpass(0);
+		dependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
+		dependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+		dependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+
+		createInfo.setDependencies(dependency);
+		createInfo.setSubpasses(subpass);
+		createInfo.setAttachments(attachDescr);
+
+		renderPass = Context::GetInstance().device.createRenderPass(createInfo);
+	}
+	
 	void RenderProcess::DestroyPipeline() {
-		Context::GetInstance().device.destroyPipeline(pipeline);
+		auto& device = Context::GetInstance().device;
+
+		device.destroyRenderPass(renderPass);
+		device.destroyPipelineLayout(layout);
+		device.destroyPipeline(pipeline);
 	}
 }

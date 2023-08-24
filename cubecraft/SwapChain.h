@@ -6,11 +6,12 @@ namespace cubecraft {
 	class SwapChain final {
 	public:
 		SwapChain();
-		~SwapChain();
+		void DestroySwapChain();
 
 		void queryswapchainInfo();
 		void getImages();
 		void createImageViews();
+		void createFrameBuffers();
 
 		struct swapchainInfo
 		{
@@ -26,5 +27,6 @@ namespace cubecraft {
 		vk::SwapchainKHR swapchain;//½»»»Á´
 		std::vector<vk::Image> images;
 		std::vector<vk::ImageView> imageViews;
+		std::vector<vk::Framebuffer> framebuffers;
 	};
 }
