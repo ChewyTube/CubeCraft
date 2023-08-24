@@ -2,6 +2,20 @@
 #include "../cubecraft/Context.h"
 
 namespace cubecraft {
+    VkShaderModule RenderProcess::createShaderModule(const std::vector<char>& code) {
+        VkShaderModuleCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.codeSize = code.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+        VkShaderModule shaderModule;
+        if (vkCreateShaderModule(Context::GetInstance().device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create shader module!");
+        }
+
+        return shaderModule;
+    }
+
 	void RenderProcess::InitPipeline() {
 		vk::GraphicsPipelineCreateInfo createInfo;
 
@@ -66,7 +80,7 @@ namespace cubecraft {
 		auto result = Context::GetInstance().device.createGraphicsPipeline(nullptr,createInfo);
 		if (result.result != vk::Result::eSuccess) {
 			throw std::runtime_error("创建渲染管线失败");
-		}
+        }
 		std::cout << "成功创建渲染管线\n";
 		pipeline = result.value;
 	}

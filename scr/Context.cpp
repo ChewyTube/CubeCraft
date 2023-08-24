@@ -3,55 +3,46 @@
 #include <vector>
 
 namespace cubecraft {
-	std::unique_ptr<Context> Context::instance_ = nullptr;
-
-	void Context::Init() {
-		instance_.reset(new Context);
+	std::unique_ptr<Context> Context::instance_(nullptr);
+	
+	void Context::Init(GLFWwindow* window) {
+		instance_.reset(new Context(window));
+		std::cout << "成功创建类实例：" << instance_;
 	}
-	void Context::InitWindow() {
-		glfwInit();
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-
+	void Context::Quit() {
+		instance_.reset();
 	}
-	void Context::InitVulkan() {
+	
+	Context::Context(GLFWwindow* window) {
+		//if (!instance_)instance_.reset(new Context);
+		//instance_ = new (std::nothrow) Context();
+		//std::cout << instance_;
+		InitVulkan(window);
+	}
+	Context::~Context() {
+		QuitVulkan();
+	}
+
+	void Context::InitVulkan(GLFWwindow* window) {
 		createInstance();
 		if (showAvailableLayers)getLayers();
 		pickupPhyicalDevice();
-		createSurface();
+		createSurface(window);
 		queryQueueFamilyIndecis();
 		createDevice();
-		createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
-		renderProcess.InitPipeline();
 		getQueues();
+		swapChain.reset(new SwapChain());
+		//createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
+		//renderProcess->InitPipeline();
 	}
-	void Context::MainLoop() {
-		while (!glfwWindowShouldClose(window)) {
-			glfwPollEvents();
-		}
-	}
+	
 	void Context::QuitVulkan() {
 		destroyShader();
-		for (auto& view : imageViews) {
-			device.destroyImageView(view);
-		}
-		device.destroySwapchainKHR(swapchain);
 		device.destroy();
 		vkDestroySurfaceKHR(instance, surface, nullptr);
 		instance.destroy();
 	}
-	void Context::QuitWindow() {
-		glfwDestroyWindow(window);
-		glfwTerminate();
-	}
-
-	Context Context::GetInstance() {
-		//std::cout << instance_;
-		return *instance_;
-	}
+	
 
 	void Context::createInstance() {
 		vk::ApplicationInfo appInfo;
@@ -136,7 +127,7 @@ namespace cubecraft {
 		graphicsQueue = device.getQueue(queueFamilyIndecis.graphicsQueue.value(), 0);
 		presentQueue = device.getQueue(queueFamilyIndecis.presentQueue.value(), 0);
 	}
-	void Context::createSurface() {
+	void Context::createSurface(GLFWwindow* window) {
 		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}

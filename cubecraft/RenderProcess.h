@@ -9,6 +9,7 @@ namespace cubecraft {
 		void InitPipeline();
 		void DestroyPipeline();
 		RenderProcess* GetRenderProcess();
+		VkShaderModule createShaderModule(const std::vector<char>& code);
 	private:
 
 	};

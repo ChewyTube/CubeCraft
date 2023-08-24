@@ -1,20 +1,22 @@
 #include "../cubecraft/Context.h"
+#include "../cubecraft/SwapChain.h"
 
 namespace cubecraft {
-	void Context::createSwapChain() {
-		querySwapChainInfo();
+	SwapChain::SwapChain() {
+		queryswapchainInfo();
+		auto& queueFamilyIndecis = Context::GetInstance().queueFamilyIndecis;
 
 		vk::SwapchainCreateInfoKHR createInfo;
 		createInfo.setClipped(true)
 			.setImageArrayLayers(1)
 			.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 			.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-			.setSurface(surface)
-			.setImageColorSpace(swapChainInfo.imageFormat.colorSpace)
-			.setImageFormat(swapChainInfo.imageFormat.format)
-			.setImageExtent(swapChainInfo.imageExtent)
-			.setMinImageCount(swapChainInfo.imageCount)
-			.setPresentMode(swapChainInfo.present);
+			.setSurface(Context::GetInstance().surface)
+			.setImageColorSpace(swapchainInfo.imageFormat.colorSpace)
+			.setImageFormat(swapchainInfo.imageFormat.format)
+			.setImageExtent(swapchainInfo.imageExtent)
+			.setMinImageCount(swapchainInfo.imageCount)
+			.setPresentMode(swapchainInfo.present);
 
 		const uint32_t presentQueue = queueFamilyIndecis.presentQueue.value();
 		if (queueFamilyIndecis.graphicsQueue.value() == queueFamilyIndecis.presentQueue.value()) {
@@ -27,44 +29,52 @@ namespace cubecraft {
 				.setImageSharingMode(vk::SharingMode::eConcurrent);
 		}
 
-		swapchain = device.createSwapchainKHR(createInfo);
+		swapchain = Context::GetInstance().device.createSwapchainKHR(createInfo);
 	}
-	void Context::querySwapChainInfo() {
+	SwapChain::~SwapChain() {
+		for (auto& view : imageViews) {
+			Context::GetInstance().device.destroyImageView(view);
+		}
+		Context::GetInstance().device.destroySwapchainKHR(swapchain);
+	}
+	void SwapChain::queryswapchainInfo() {
 		uint32_t w = WIDTH;
 		uint32_t h = HEIGHT;
 
+		auto& phyDevice = Context::GetInstance().phyDevice;
+		auto& surface = Context::GetInstance().surface;
+
 		auto formats = phyDevice.getSurfaceFormatsKHR(surface);
-		swapChainInfo.imageFormat = formats[0];
+		swapchainInfo.imageFormat = formats[0];
 		for (const auto& format : formats) {
 			if (format.format == vk::Format::eR8G8B8A8Srgb &&
 				format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-				swapChainInfo.imageFormat = format;
+				swapchainInfo.imageFormat = format;
 				break;
 			}
 		}
 
 		auto capabilities = phyDevice.getSurfaceCapabilitiesKHR(surface);
-		swapChainInfo.imageCount = std::clamp<uint32_t>(2, capabilities.minImageCount, capabilities.maxImageCount);
+		swapchainInfo.imageCount = std::clamp<uint32_t>(2, capabilities.minImageCount, capabilities.maxImageCount);
 
-		swapChainInfo.imageExtent.width = std::clamp(w, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-		swapChainInfo.imageExtent.height = std::clamp(h, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-		
-		swapChainInfo.transform = capabilities.currentTransform;
+		swapchainInfo.imageExtent.width = std::clamp(w, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+		swapchainInfo.imageExtent.height = std::clamp(h, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+		swapchainInfo.transform = capabilities.currentTransform;
 
 		auto presents = phyDevice.getSurfacePresentModesKHR(surface);
-		swapChainInfo.present = vk::PresentModeKHR::eFifo;
+		swapchainInfo.present = vk::PresentModeKHR::eFifo;
 		for (const auto& present : presents) {
 			if (present == vk::PresentModeKHR::eMailbox) {
-				swapChainInfo.present = present;
+				swapchainInfo.present = present;
 				break;
 			}
 		}
 	}
-
-	void Context::getImages() {
-		images = device.getSwapchainImagesKHR(swapchain);
+	void SwapChain::getImages() {
+		images = Context::GetInstance().device.getSwapchainImagesKHR(swapchain);
 	}
-	void Context::createImageViews() {
+	void SwapChain::createImageViews() {
 		imageViews.resize(images.size());
 
 		for (int i = 0; i < images.size(); i++) {
@@ -86,10 +96,10 @@ namespace cubecraft {
 			createInfo.setImage(images[i])
 				.setViewType(vk::ImageViewType::e2D)
 				.setComponents(mapping)
-				.setFormat(swapChainInfo.imageFormat.format)
+				.setFormat(swapchainInfo.imageFormat.format)
 				.setSubresourceRange(range);
 
-			imageViews[i] = device.createImageView(createInfo);
+			imageViews[i] = Context::GetInstance().device.createImageView(createInfo);
 		}
 	}
 }

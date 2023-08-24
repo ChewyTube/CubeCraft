@@ -9,28 +9,17 @@
 #include <iostream>
 #include "Shader.h"
 #include "RenderProcess.h"
+#include "SwapChain.h"
 #include "../scr/Utils/ReadWholeFile.h"
 
 namespace cubecraft{
 	const uint32_t WIDTH = 800;
 	const uint32_t HEIGHT = 600;
+	const std::string vertPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\vert.spv";
+	const std::string fragPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\frag.spv";
 
-	class Context {
+	class Context final{
 	public:
-		void Init();
-		void InitWindow();
-		void InitVulkan();
-		void MainLoop();
-		void QuitVulkan();
-		void QuitWindow();
-
-		static Context GetInstance();
-		static std::unique_ptr<Context> instance_;
-
-		vk::ShaderModule vertexModule;
-		vk::ShaderModule fragmentModule;
-		vk::Device device;//逻辑设备
-
 		struct QueueFamilyIndecis
 		{
 			std::optional<uint32_t> graphicsQueue;
@@ -40,19 +29,47 @@ namespace cubecraft{
 				return graphicsQueue.has_value() && presentQueue.has_value();
 			}
 		};
+
+		static void Init(GLFWwindow* window);
+		static void Quit();
+		static Context& GetInstance() {
+			//std::cout << instance_;
+			//if(!instance_)instance_ = new (std::nothrow) Context();
+			assert(instance_);
+			/*
+			if (instance_ == nullptr) {
+				throw std::runtime_error("初始化失败");
+				//instance_ = new (std::nothrow) Context();
+			}
+			*/
+
+			return *instance_;
+		}
+
+		~Context();
+
+		void InitVulkan(GLFWwindow* window);
+		void MainLoop(GLFWwindow* window);
+		void QuitVulkan();
+
+
+		vk::ShaderModule vertexModule;
+		vk::ShaderModule fragmentModule;
+		vk::Device device;//逻辑设备
+		VkSurfaceKHR surface;//表面
+		vk::PhysicalDevice phyDevice;//物理设备
+		QueueFamilyIndecis queueFamilyIndecis;
+		std::unique_ptr<SwapChain> swapChain;
+
+		bool fiestTime = true;
 	private:
-		RenderProcess renderProcess;
+		Context(GLFWwindow* window);
+		static std::unique_ptr<Context> instance_;
 
-		struct SwapChainInfo
-		{
-			vk::Extent2D imageExtent;
-			vk::SurfaceFormatKHR imageFormat;
-			vk::SurfaceTransformFlagsKHR transform;
-			vk::PresentModeKHR present;
-			uint32_t imageCount;
-		};
+		//RenderProcess renderProcess;
 
-		GLFWwindow* window;
+		
+
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_LUNARG_standard_validation"
@@ -63,26 +80,18 @@ namespace cubecraft{
 		bool showPickedGPU = true;
 
 		vk::Instance instance;//Vulkan实例
-		vk::PhysicalDevice phyDevice;//物理设备
 		vk::Queue graphicsQueue;//图形队列
 		vk::Queue presentQueue;//命令队列
-		vk::SwapchainKHR swapchain;//交换链
-		VkSurfaceKHR surface;//表面
-		QueueFamilyIndecis queueFamilyIndecis;
-		SwapChainInfo swapChainInfo;
 
 		std::vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
-		std::vector<vk::Image> images;
-		std::vector<vk::ImageView> imageViews;
 
-		const std::string vertPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\vert.spv";
-		const std::string fragPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\frag.spv";
+		std::unique_ptr<RenderProcess> renderProcess;
 
 		//------------------------Context.cpp------------------------
 		void createInstance();
 		void pickupPhyicalDevice();
 		void createDevice();
-		void createSurface();
+		void createSurface(GLFWwindow* window);
 		void queryQueueFamilyIndecis();
 		void getQueues();
 
@@ -91,7 +100,7 @@ namespace cubecraft{
 
 		//------------------------SwapChain.cpp------------------------
 		void createSwapChain();
-		void querySwapChainInfo();
+		void queryswapchainInfo();
 		void getImages();
 		void createImageViews();
 

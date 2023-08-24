@@ -5,17 +5,14 @@
 #include <stdexcept>
 #include <cstdlib>
 
-#include "cubecraft/Context.h"
+#include "cubecraft/CubeCraft.h"
 
-
+/*
 class CubeCraft {
 public:
     void run() {
         Init();
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
+        Quit();
     }
 
 private:
@@ -23,6 +20,9 @@ private:
 
     void Init() {
         context.Init();
+    }
+    void Quit() {
+        context.Quit();
     }
 
     void initWindow() {
@@ -42,17 +42,33 @@ private:
         context.QuitWindow();
     }
 };
+*/
 
 int main() {
-    CubeCraft app;
+    GLFWwindow* window;
+    glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    window = glfwCreateWindow(cubecraft::WIDTH, cubecraft::HEIGHT, "Vulkan", nullptr, nullptr);
 
     try {
-        app.run();
+        cubecraft::Init(window);
+
+        while (!glfwWindowShouldClose(window)) {
+            glfwPollEvents();
+        }
+        
+        cubecraft::Quit();
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
     return EXIT_SUCCESS;
 }
