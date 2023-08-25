@@ -3,28 +3,22 @@
 #include <vector>
 
 namespace cubecraft {
-	Context* Context::instance_ = nullptr;
+	std::unique_ptr<Context> Context::instance_ = nullptr;
 	
 	void Context::Init(GLFWwindow* window) {
-		instance_ = new Context();
+		instance_.reset(new Context(window));
 		std::cout << "成功创建类实例：" << instance_ << std::endl;
 	}
 	void Context::Quit() {
-		delete instance_;
-		instance_ = nullptr;
+		instance_.reset();
 	}
 	
 	Context::Context(GLFWwindow* window) {
 		//if (!instance_)instance_.reset(new Context);
 		//instance_ = new (std::nothrow) Context();
 		//std::cout << instance_;
-		InitVulkan(window);
-	}
-	Context::Context(){
 		createInstance();
-	}
-	Context::Context(int tmp) {
-		;
+		InitVulkan(window);
 	}
 	Context::~Context() {
 		QuitVulkan();
@@ -46,6 +40,7 @@ namespace cubecraft {
 		device.destroy();
 		instance.destroy();
 	}
+	
 	
 
 	void Context::createInstance() {

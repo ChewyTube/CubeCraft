@@ -30,6 +30,9 @@ namespace cubecraft {
 		}
 
 		swapchain = Context::GetInstance().device.createSwapchainKHR(createInfo);
+
+		getImages();
+		createImageViews();
 	}
 	void SwapChain::DestroySwapChain(){
 		for (auto& view : imageViews) {

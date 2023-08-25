@@ -10,6 +10,8 @@
 #include "Shader.h"
 #include "RenderProcess.h"
 #include "SwapChain.h"
+#include "Renderer.h"
+
 #include "../scr/Utils/ReadWholeFile.h"
 
 namespace cubecraft{
@@ -42,7 +44,6 @@ namespace cubecraft{
 				//instance_ = new (std::nothrow) Context();
 			}
 			*/
-
 			return *instance_;
 		}
 
@@ -58,24 +59,26 @@ namespace cubecraft{
 		VkSurfaceKHR surface;//表面
 		vk::PhysicalDevice phyDevice;//物理设备
 		QueueFamilyIndecis queueFamilyIndecis;
+		vk::Queue graphicsQueue;//图形队列
+		vk::Queue presentQueue;//命令队列
 
 		std::unique_ptr<SwapChain> swapChain;
 		std::unique_ptr<RenderProcess> renderProcess;
+		std::unique_ptr<Renderer> renderer;
 
 		bool fiestTime = true;
 
-		Context(GLFWwindow* window);
-		Context(int tmp);
-		Context();
+		
+
 
 		//------------------------Shader.cpp------------------------
 		void createShader(const std::string& vertSource, const std::string& fragSource);
 	private:
-		static Context *instance_;
+		static std::unique_ptr<Context> instance_;
 
 		//RenderProcess renderProcess;
 
-		
+		Context(GLFWwindow* window);
 
 
 		const std::vector<const char*> validationLayers = {
@@ -87,8 +90,7 @@ namespace cubecraft{
 		bool showPickedGPU = true;
 
 		vk::Instance instance;//Vulkan实例
-		vk::Queue graphicsQueue;//图形队列
-		vk::Queue presentQueue;//命令队列
+		
 
 		std::vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
 

@@ -53,7 +53,7 @@ namespace cubecraft {
 		vk::PipelineRasterizationStateCreateInfo rastStage;
 		rastStage.setRasterizerDiscardEnable(false);
 		rastStage.setCullMode(vk::CullModeFlagBits::eBack);
-		rastStage.setFrontFace(vk::FrontFace::eCounterClockwise);
+		rastStage.setFrontFace(vk::FrontFace::eClockwise);
 		rastStage.setPolygonMode(vk::PolygonMode::eFill);
 		rastStage.setLineWidth(1);
 		createInfo.setPRasterizationState(&rastStage);
@@ -91,8 +91,9 @@ namespace cubecraft {
 		if (result.result != vk::Result::eSuccess) {
 			throw std::runtime_error("创建渲染管线失败");
         }
-		std::cout << "成功创建渲染管线\n";
+
 		pipeline = result.value;
+		std::cout << "成功创建渲染管线：" << pipeline << std::endl;
 	}
 	void RenderProcess::InitLayout() {
 		vk::PipelineLayoutCreateInfo createInfo;
@@ -108,7 +109,7 @@ namespace cubecraft {
 
 		attachDescr.setFormat(Context::GetInstance().swapChain->swapchainInfo.imageFormat.format);
 		attachDescr.setInitialLayout(vk::ImageLayout::eUndefined);
-		attachDescr.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+		attachDescr.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 		attachDescr.setLoadOp(vk::AttachmentLoadOp::eClear);
 		attachDescr.setStoreOp(vk::AttachmentStoreOp::eStore);
 		attachDescr.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
@@ -140,5 +141,10 @@ namespace cubecraft {
 		device.destroyRenderPass(renderPass);
 		device.destroyPipelineLayout(layout);
 		device.destroyPipeline(pipeline);
+	}
+
+	RenderProcess::RenderProcess() {
+		//InitRenderPass();
+		//InitLayout();
 	}
 }

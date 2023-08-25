@@ -55,8 +55,10 @@ int main() {
 
     try {
         cubecraft::Init(window);
+        auto render = cubecraft::getRenderer();
 
         while (!glfwWindowShouldClose(window)) {
+            render.Render();
             glfwPollEvents();
         }
         

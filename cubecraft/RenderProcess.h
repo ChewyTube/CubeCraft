@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.hpp>
 
 namespace cubecraft {
-	class RenderProcess {
+	class RenderProcess final{
 	public:
 		vk::Pipeline pipeline;
 		vk::PipelineLayout layout;
@@ -16,6 +16,7 @@ namespace cubecraft {
 
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
+		RenderProcess();
 	private:
 
 	};
