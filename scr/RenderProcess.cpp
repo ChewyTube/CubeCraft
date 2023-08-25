@@ -2,7 +2,8 @@
 #include "../cubecraft/Context.h"
 
 namespace cubecraft {
-    VkShaderModule RenderProcess::createShaderModule(const std::vector<char>& code) {
+	/*
+	VkShaderModule RenderProcess::createShaderModule(const std::vector<char>& code) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
@@ -15,8 +16,10 @@ namespace cubecraft {
 
         return shaderModule;
     }
+	*/
+   
 
-	void RenderProcess::InitPipeline() {
+	vk::Pipeline RenderProcess::createGraphicsPipeline(const Shader& shader, vk::PrimitiveTopology topology) {
 		vk::GraphicsPipelineCreateInfo createInfo;
 
 		//1.顶点输入
@@ -30,16 +33,14 @@ namespace cubecraft {
 		createInfo.setPInputAssemblyState(&inputAssembly);
 
 		//3.着色器
-		vk::PipelineShaderStageCreateInfo vertexShaderStage;
-		vertexShaderStage.setStage(vk::ShaderStageFlagBits::eVertex);
-		vertexShaderStage.setModule(Context::GetInstance().vertexModule);
-		vertexShaderStage.setPName("main");
-		vk::PipelineShaderStageCreateInfo fragmentShaderStage;
-		fragmentShaderStage.setStage(vk::ShaderStageFlagBits::eFragment);
-		fragmentShaderStage.setModule(Context::GetInstance().fragmentModule);
-		fragmentShaderStage.setPName("main");
-		auto stages = { vertexShaderStage, fragmentShaderStage };
-		createInfo.setStages(stages);
+		std::array<vk::PipelineShaderStageCreateInfo, 2> stageCreateInfos;
+		stageCreateInfos[0].setModule(shader.GetVertexModule())
+			.setPName("main")
+			.setStage(vk::ShaderStageFlagBits::eVertex);
+		stageCreateInfos[1].setModule(shader.GetFragModule())
+			.setPName("main")
+			.setStage(vk::ShaderStageFlagBits::eFragment);
+		createInfo.setStages(stageCreateInfos);
 
 		//4.视口变换
 		vk::PipelineViewportStateCreateInfo viewportState;
@@ -92,14 +93,14 @@ namespace cubecraft {
 			throw std::runtime_error("创建渲染管线失败");
         }
 
-		pipeline = result.value;
-		std::cout << "成功创建渲染管线：" << pipeline << std::endl;
+		std::cout << "成功创建渲染管线：" << result.value << std::endl;
+		return result.value;
 	}
-	void RenderProcess::InitLayout() {
+	vk::PipelineLayout RenderProcess::createLayout() {
 		vk::PipelineLayoutCreateInfo createInfo;
-		layout = Context::GetInstance().device.createPipelineLayout(createInfo);
+		return Context::GetInstance().device.createPipelineLayout(createInfo);
 	}
-	void RenderProcess::InitRenderPass() {
+	vk::RenderPass RenderProcess::createRenderPass() {
 		vk::RenderPassCreateInfo createInfo;
 
 		vk::AttachmentDescription attachDescr;
@@ -132,19 +133,30 @@ namespace cubecraft {
 		createInfo.setSubpasses(subpass);
 		createInfo.setAttachments(attachDescr);
 
-		renderPass = Context::GetInstance().device.createRenderPass(createInfo);
+		return Context::GetInstance().device.createRenderPass(createInfo);
 	}
 	
-	void RenderProcess::DestroyPipeline() {
+	RenderProcess::~RenderProcess() {
 		auto& device = Context::GetInstance().device;
 
+		//device.destroyPipelineCache(pipelineCache_);
 		device.destroyRenderPass(renderPass);
 		device.destroyPipelineLayout(layout);
-		device.destroyPipeline(pipeline);
+		device.destroyPipeline(graphicsPipelineWithTriangleTopology);
+		//device.destroyPipeline(graphicsPipelineWithLineTopology);
+	}
+
+	void RenderProcess::CreateGraphicsPipeline(const Shader& shader) {
+		graphicsPipelineWithTriangleTopology = createGraphicsPipeline(shader, vk::PrimitiveTopology::eTriangleList);
+	}
+
+	void RenderProcess::CreateRenderPass() {
+		renderPass = createRenderPass();
 	}
 
 	RenderProcess::RenderProcess() {
-		//InitRenderPass();
-		//InitLayout();
+		layout = createLayout();
+		CreateRenderPass();
+		graphicsPipelineWithTriangleTopology = nullptr;
 	}
 }

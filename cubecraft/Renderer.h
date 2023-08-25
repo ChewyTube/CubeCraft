@@ -1,25 +1,35 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+//#include "Math.h"
 
 namespace cubecraft {
 	class Renderer final {
 	public:
-		Renderer();
+		Renderer(int maxFlightCount);
 		~Renderer();
 
-		void Render();
+		void StartRender();
+		void EndRender();
+
+		//void DrawTexture(const Rect& rect, Texture& texture);
+		void render();
 	private:
-		vk::CommandPool cmdPool_;
-		vk::CommandBuffer cmdBufffer_;
+		int maxFlightCount_;
+		int curFrame_;
+		uint32_t imageIndex_;
+		std::vector<vk::Fence> fences_;
+		std::vector<vk::Semaphore> imageAvaliableSems_;
+		std::vector<vk::Semaphore> renderFinishSems_;
+		std::vector<vk::CommandBuffer> cmdBufs_;
 
 		vk::Semaphore imageAvaliable_;
 		vk::Semaphore imageDrawFinish_;
 		vk::Fence cmdAvaliableFence_;
 
-		void InitCommandPool();
-		void allocCmdBuffer();
 		void createSems();
 		void createFence();
+
+		void createCmdBuffers();
 	};
 }

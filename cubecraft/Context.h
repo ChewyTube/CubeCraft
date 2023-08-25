@@ -11,14 +11,17 @@
 #include "RenderProcess.h"
 #include "SwapChain.h"
 #include "Renderer.h"
+#include "CommandManager.h"
 
 #include "../scr/Utils/ReadWholeFile.h"
 
 namespace cubecraft{
+
 	const uint32_t WIDTH = 800;
 	const uint32_t HEIGHT = 600;
 	const std::string vertPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\vert.spv";
 	const std::string fragPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\frag.spv";
+
 
 	class Context final{
 	public:
@@ -50,9 +53,9 @@ namespace cubecraft{
 		~Context();
 
 		void InitVulkan(GLFWwindow* window);
-		void QuitVulkan();
 
 
+		vk::Instance instance;//Vulkan实例
 		vk::ShaderModule vertexModule;
 		vk::ShaderModule fragmentModule;
 		vk::Device device;//逻辑设备
@@ -63,13 +66,25 @@ namespace cubecraft{
 		vk::Queue presentQueue;//命令队列
 
 		std::unique_ptr<SwapChain> swapChain;
-		std::unique_ptr<RenderProcess> renderProcess;
 		std::unique_ptr<Renderer> renderer;
+		std::unique_ptr<RenderProcess> renderProcess;
+		std::unique_ptr<CommandManager> commandManager;
+		std::unique_ptr<Shader> shader;
 
 		bool fiestTime = true;
 
-		
+		void initRenderProcess();
+		void initSwapchain();
+		void initGraphicsPipeline();
+		void initCommandPool();
+		void initShaderModules();
+		void initRenderer();
+		//void initSampler();
+		//void getSurface();
 
+		Renderer* GetRenderer() {
+			return Context::GetInstance().renderer.get();
+		}
 
 		//------------------------Shader.cpp------------------------
 		void createShader(const std::string& vertSource, const std::string& fragSource);
@@ -89,7 +104,6 @@ namespace cubecraft{
 		bool showAvailableLayers = true;
 		bool showPickedGPU = true;
 
-		vk::Instance instance;//Vulkan实例
 		
 
 		std::vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
@@ -105,8 +119,5 @@ namespace cubecraft{
 		void getQueues();
 
 		//------------------------Layers.cpp------------------------
-		void getLayers();
-
-		
-	};
+		void getLayers();	};
 }

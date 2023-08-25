@@ -22,6 +22,9 @@ namespace cubecraft {
 			uint32_t imageCount;
 		};
 
+		const auto& GetExtent() const { return swapchainInfo.imageExtent; }
+		const auto& GetFormat() const { return swapchainInfo.imageFormat; }
+
 		swapchainInfo swapchainInfo;
 
 		vk::SwapchainKHR swapchain;//½»»»Á´

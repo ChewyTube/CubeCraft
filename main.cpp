@@ -45,6 +45,9 @@ private:
 */
 
 int main() {
+    float w = cubecraft::WIDTH;
+    float h = cubecraft::HEIGHT;
+
     GLFWwindow* window;
     glfwInit();
 
@@ -55,10 +58,19 @@ int main() {
 
     try {
         cubecraft::Init(window);
-        auto render = cubecraft::getRenderer();
+        auto renderer = cubecraft::Context::GetInstance().GetRenderer();
 
         while (!glfwWindowShouldClose(window)) {
-            render.Render();
+            renderer->StartRender();
+            //renderer.SetDrawColor(cubecraft::Color{1, 0, 0});
+            //renderer.DrawTexture(cubecraft::Rect{cubecraft::Vec{x, y}, cubecraft::Size{200, 300}}, * texture1);
+            //renderer.SetDrawColor(cubecraft::Color{0, 1, 0});
+            //renderer.DrawTexture(cubecraft::Rect{cubecraft::Vec{500, 100}, cubecraft::Size{200, 300}}, * texture2);
+            //renderer.SetDrawColor(cubecraft::Color{0, 0, 1});
+            //renderer.DrawLine(cubecraft::Vec{0, 0}, cubecraft::Vec{w, h});
+            renderer->render();
+            renderer->EndRender();
+
             glfwPollEvents();
         }
         

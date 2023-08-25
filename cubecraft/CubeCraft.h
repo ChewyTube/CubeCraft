@@ -1,10 +1,20 @@
 #pragma once 
 #include <iostream>
 #include "Context.h"
+#include "Math.h"
 
 namespace cubecraft {
 	static void Init(GLFWwindow* window) {
 		Context::Init(window);//创建类instance 以及Vulkan实例
+		auto& ctx = Context::GetInstance();
+		ctx.initSwapchain();
+		ctx.initShaderModules();
+		ctx.initRenderProcess();
+		ctx.initGraphicsPipeline();
+		ctx.swapChain->createFrameBuffers();
+		ctx.initCommandPool();
+		ctx.initRenderer();
+		/*
 		Context::GetInstance().InitVulkan(window);//初始化Vulkan
 		Context::GetInstance().swapChain.reset(new SwapChain());
 		Context::GetInstance().createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
@@ -13,17 +23,25 @@ namespace cubecraft {
 		Context::GetInstance().renderProcess->InitLayout();
 		Context::GetInstance().swapChain->createFrameBuffers();
 		Context::GetInstance().renderProcess->InitPipeline();
-		Context::GetInstance().renderer.reset(new Renderer());
+		Context::GetInstance().renderer.reset(new Renderer(2));
+		*/
+		
+		//Context::GetInstance().commandManager.reset(new CommandManager());
 
 	}
 	static void Quit() {
-		Context::GetInstance().
+		//Context::GetInstance().
 		//Context::GetInstance().renderProcess->DestroyPipeline();
+		Context::GetInstance().device.waitIdle();
+		Context::GetInstance().renderer.reset();
+		//Context::GetInstance().renderProcess.reset();
 		Context::GetInstance().swapChain->DestroySwapChain();
-		Context::Quit();
-	}
 
-	inline Renderer& getRenderer() {
-		return *Context::GetInstance().renderer;
+		Context::GetInstance().shader.reset();
+		Context::GetInstance().commandManager.reset();
+		Context::GetInstance().renderProcess.reset();
+		Context::GetInstance().swapChain.reset();
+
+		Context::Quit();
 	}
 }

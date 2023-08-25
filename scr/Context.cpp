@@ -21,7 +21,8 @@ namespace cubecraft {
 		InitVulkan(window);
 	}
 	Context::~Context() {
-		QuitVulkan();
+		device.destroy();
+		instance.destroy();
 	}
 
 	void Context::InitVulkan(GLFWwindow* window) {
@@ -35,14 +36,6 @@ namespace cubecraft {
 		//createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
 	}
 	
-	void Context::QuitVulkan() {
-		Context::GetInstance().renderProcess.reset();
-		device.destroy();
-		instance.destroy();
-	}
-	
-	
-
 	void Context::createInstance() {
 		vk::ApplicationInfo appInfo;
 		vk::InstanceCreateInfo createInfo;
@@ -130,5 +123,31 @@ namespace cubecraft {
 		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
+	}
+
+	void Context::initSwapchain() {
+		swapChain = std::make_unique<SwapChain>();
+	}
+
+	void Context::initRenderProcess() {
+		renderProcess = std::make_unique<RenderProcess>();
+	}
+
+	void Context::initGraphicsPipeline() {
+		renderProcess->CreateGraphicsPipeline(*shader);
+	}
+
+	void Context::initCommandPool() {
+		commandManager = std::make_unique<CommandManager>();
+	}
+
+	void Context::initRenderer() {
+		renderer = std::make_unique<Renderer>(2);
+	}
+
+	void Context::initShaderModules() {
+		auto vertexSource = readFile(vertPath);
+		auto fragSource = readFile(fragPath);
+		shader = std::make_unique<Shader>(device, vertexSource, fragSource);
 	}
 }

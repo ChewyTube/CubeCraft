@@ -2,7 +2,7 @@
 #include "../cubecraft/Context.h"
 
 namespace cubecraft {
-	Shader::Shader(vk::Device device, const std::string& vertSource, const std::string& fragSource) {
+	Shader::Shader(vk::Device device, const std::vector<char> vertSource, const std::vector<char> fragSource) {
 		vk::ShaderModuleCreateInfo createInfo;
 		createInfo.setCodeSize(vertSource.size());
 		createInfo.setPCode((uint32_t*)vertSource.data());
@@ -12,8 +12,8 @@ namespace cubecraft {
 		createInfo.setPCode((uint32_t*)fragSource.data());
 		fragmentModule = device.createShaderModule(createInfo);
 	}
-	
-	void Shader::destroyShaderModules(vk::Device device) {
+	Shader::~Shader() {
+		auto& device = Context::GetInstance().device;
 		device.destroyShaderModule(vertexModule);
 		device.destroyShaderModule(fragmentModule);
 	}

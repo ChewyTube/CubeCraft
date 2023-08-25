@@ -1,23 +1,26 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
+#include "Shader.h"
 
 namespace cubecraft {
 	class RenderProcess final{
 	public:
-		vk::Pipeline pipeline;
-		vk::PipelineLayout layout;
-		vk::RenderPass renderPass;
+		vk::Pipeline graphicsPipelineWithTriangleTopology = nullptr;
+		vk::RenderPass renderPass = nullptr;
+		vk::PipelineLayout layout = nullptr;
 
-		void InitLayout();
-		void InitRenderPass();
-		void InitPipeline();
+		
+		void CreateGraphicsPipeline(const Shader& shader);
+		void CreateRenderPass();
 
-		void DestroyPipeline();
-
-		VkShaderModule createShaderModule(const std::vector<char>& code);
+		//VkShaderModule createShaderModule(const std::vector<char>& code);
 
 		RenderProcess();
+		~RenderProcess();
 	private:
-
+		vk::PipelineLayout createLayout();
+		vk::Pipeline createGraphicsPipeline(const Shader& shader, vk::PrimitiveTopology);
+		vk::RenderPass createRenderPass();
+		//vk::PipelineCache createPipelineCache();
 	};
 }

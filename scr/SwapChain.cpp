@@ -42,6 +42,7 @@ namespace cubecraft {
 			Context::GetInstance().device.destroyFramebuffer(framebuffer);
 		}
 		Context::GetInstance().device.destroySwapchainKHR(swapchain);
+		Context::GetInstance().instance.destroySurfaceKHR(Context::GetInstance().surface);
 	}
 	void SwapChain::queryswapchainInfo() {
 		uint32_t w = WIDTH;
