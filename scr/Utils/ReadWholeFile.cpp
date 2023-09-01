@@ -1,21 +1,19 @@
-#include "ReadWholeFile.h"
+#include "../../cubecraft/Utils/ReadWholeFile.h"
 
-std::string cubecraft::ReadWholeFile(const std::string& filename) {
+std::vector<char> ReadWholeFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
 	if (!file.is_open()) {
-		std::cout << "failed to read file:" << filename << std::endl;
-		return std::string{};
+		std::cout << "read " << filename << " failed" << std::endl;
+		return std::vector<char>{};
 	}
 
 	auto size = file.tellg();
-	std::string content;
-	content.resize(size);
+	std::vector<char> content(size);
 	file.seekg(0);
 
 	file.read(content.data(), content.size());
 
-	std::cout << "成功读取文件：" << filename << std::endl;
 	return content;
 }
 

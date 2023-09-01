@@ -13,7 +13,7 @@
 #include "Renderer.h"
 #include "CommandManager.h"
 
-#include "../scr/Utils/ReadWholeFile.h"
+#include "Utils/ReadWholeFile.h"
 
 namespace cubecraft{
 
@@ -37,7 +37,7 @@ namespace cubecraft{
 
 		static void Init(GLFWwindow* window);
 		static void Quit();
-		static Context& GetInstance() {
+		static Context& Instance() {
 			//std::cout << instance_;
 			//if(!instance_)instance_ = new (std::nothrow) Context();
 			assert(instance_);
@@ -83,7 +83,7 @@ namespace cubecraft{
 		//void getSurface();
 
 		Renderer* GetRenderer() {
-			return Context::GetInstance().renderer.get();
+			return Context::Instance().renderer.get();
 		}
 
 		//------------------------Shader.cpp------------------------
@@ -119,5 +119,6 @@ namespace cubecraft{
 		void getQueues();
 
 		//------------------------Layers.cpp------------------------
-		void getLayers();	};
+		void getLayers();	
+	};
 }

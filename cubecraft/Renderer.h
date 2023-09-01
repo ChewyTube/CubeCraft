@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-//#include "Math.h"
+#include "Vertex.h"
+#include "Buffer.h"
+#include "Uniform.h"
 
 namespace cubecraft {
 	class Renderer final {
@@ -23,13 +25,29 @@ namespace cubecraft {
 		std::vector<vk::Semaphore> renderFinishSems_;
 		std::vector<vk::CommandBuffer> cmdBufs_;
 
-		vk::Semaphore imageAvaliable_;
-		vk::Semaphore imageDrawFinish_;
-		vk::Fence cmdAvaliableFence_;
+		std::unique_ptr<Buffer> hostVertexBuffer_;
+		std::unique_ptr<Buffer> deviceVertexBuffer_;
+		std::vector<std::unique_ptr<Buffer>> hostUniformBuffer_;
+		std::vector<std::unique_ptr<Buffer>> deviceUniformBuffer_;
+
+		std::unique_ptr<Buffer> verticesBuffer_;
+		std::unique_ptr<Buffer> indicesBuffer_;
+
+		vk::DescriptorPool descriptorPool_;
+		std::vector<vk::DescriptorSet> sets_;
 
 		void createSems();
 		void createFence();
-
 		void createCmdBuffers();
+		void createBuffers();
+		void createUniformBuffers();
+		void bufferVertexData();
+		void bufferUniformData();
+
+		void createDescriptorPool();
+		void allocateSets();
+		void updateSets();
+
+		void copyBuffer(vk::Buffer& src, vk::Buffer& dst, size_t size, size_t srcOffset, size_t dstOffset);
 	};
 }

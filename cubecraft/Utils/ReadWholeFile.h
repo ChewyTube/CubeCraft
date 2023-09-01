@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace cubecraft {
-	std::string ReadWholeFile(const std::string& filename);
+	std::vector<char> ReadWholeFile(const std::string& filename);
     std::vector<char> readFile(const std::string& filename);
 
 }

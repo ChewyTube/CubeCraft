@@ -1,5 +1,6 @@
 #include "../cubecraft/RenderProcess.h"
 #include "../cubecraft/Context.h"
+#include "../cubecraft/Uniform.h"
 
 namespace cubecraft {
 	/*
@@ -20,10 +21,15 @@ namespace cubecraft {
    
 
 	vk::Pipeline RenderProcess::createGraphicsPipeline(const Shader& shader, vk::PrimitiveTopology topology) {
+		
 		vk::GraphicsPipelineCreateInfo createInfo;
 
 		//1.顶点输入
 		vk::PipelineVertexInputStateCreateInfo inputState;
+		auto attr = Vertex::getAttribute();
+		auto bind = Vertex::getBinding();
+		inputState.setVertexAttributeDescriptions(attr);
+		inputState.setVertexBindingDescriptions(bind);
 		createInfo.setPVertexInputState(&inputState);
 
 		//2.图元组合
@@ -88,7 +94,7 @@ namespace cubecraft {
 		createInfo.setLayout(layout);
 
 		//std::cout << Context::GetInstance().device << std::endl;
-		auto result = Context::GetInstance().device.createGraphicsPipeline(nullptr, createInfo);
+		auto result = Context::Instance().device.createGraphicsPipeline(nullptr, createInfo);
 		if (result.result != vk::Result::eSuccess) {
 			throw std::runtime_error("创建渲染管线失败");
         }
@@ -98,7 +104,9 @@ namespace cubecraft {
 	}
 	vk::PipelineLayout RenderProcess::createLayout() {
 		vk::PipelineLayoutCreateInfo createInfo;
-		return Context::GetInstance().device.createPipelineLayout(createInfo);
+		createInfo.setSetLayouts(setLayout);
+
+		return Context::Instance().device.createPipelineLayout(createInfo);
 	}
 	vk::RenderPass RenderProcess::createRenderPass() {
 		vk::RenderPassCreateInfo createInfo;
@@ -108,7 +116,7 @@ namespace cubecraft {
 		vk::AttachmentReference reference;
 		vk::SubpassDependency dependency;
 
-		attachDescr.setFormat(Context::GetInstance().swapChain->swapchainInfo.imageFormat.format);
+		attachDescr.setFormat(Context::Instance().swapChain->swapchainInfo.imageFormat.format);
 		attachDescr.setInitialLayout(vk::ImageLayout::eUndefined);
 		attachDescr.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 		attachDescr.setLoadOp(vk::AttachmentLoadOp::eClear);
@@ -133,19 +141,16 @@ namespace cubecraft {
 		createInfo.setSubpasses(subpass);
 		createInfo.setAttachments(attachDescr);
 
-		return Context::GetInstance().device.createRenderPass(createInfo);
+		return Context::Instance().device.createRenderPass(createInfo);
+	}
+	vk::DescriptorSetLayout RenderProcess::createSetLayout() {
+		vk::DescriptorSetLayoutCreateInfo createInfo;
+		auto binding = Uniform::GetBinding();
+		createInfo.setBindings(binding);
+
+		return Context::Instance().device.createDescriptorSetLayout(createInfo);
 	}
 	
-	RenderProcess::~RenderProcess() {
-		auto& device = Context::GetInstance().device;
-
-		//device.destroyPipelineCache(pipelineCache_);
-		device.destroyRenderPass(renderPass);
-		device.destroyPipelineLayout(layout);
-		device.destroyPipeline(graphicsPipelineWithTriangleTopology);
-		//device.destroyPipeline(graphicsPipelineWithLineTopology);
-	}
-
 	void RenderProcess::CreateGraphicsPipeline(const Shader& shader) {
 		graphicsPipelineWithTriangleTopology = createGraphicsPipeline(shader, vk::PrimitiveTopology::eTriangleList);
 	}
@@ -155,8 +160,19 @@ namespace cubecraft {
 	}
 
 	RenderProcess::RenderProcess() {
+		setLayout = createSetLayout();
 		layout = createLayout();
 		CreateRenderPass();
 		graphicsPipelineWithTriangleTopology = nullptr;
+	}
+	RenderProcess::~RenderProcess() {
+		auto& device = Context::Instance().device;
+
+		//device.destroyPipelineCache(pipelineCache_);
+		device.destroyDescriptorSetLayout(setLayout);
+		device.destroyRenderPass(renderPass);
+		device.destroyPipelineLayout(layout);
+		device.destroyPipeline(graphicsPipelineWithTriangleTopology);
+		//device.destroyPipeline(graphicsPipelineWithLineTopology);
 	}
 }

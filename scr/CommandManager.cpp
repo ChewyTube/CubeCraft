@@ -8,16 +8,16 @@ namespace cubecraft {
     }
 
     CommandManager::~CommandManager() {
-        auto& ctx = Context::GetInstance();
+        auto& ctx = Context::Instance();
         ctx.device.destroyCommandPool(pool_);
     }
 
     void CommandManager::ResetCmds() {
-        Context::GetInstance().device.resetCommandPool(pool_);
+        Context::Instance().device.resetCommandPool(pool_);
     }
 
     vk::CommandPool CommandManager::createCommandPool() {
-        auto& ctx = Context::GetInstance();
+        auto& ctx = Context::Instance();
 
         vk::CommandPoolCreateInfo createInfo;
 
@@ -28,7 +28,7 @@ namespace cubecraft {
     }
 
     std::vector<vk::CommandBuffer> CommandManager::CreateCommandBuffers(std::uint32_t count) {
-        auto& ctx = Context::GetInstance();
+        auto& ctx = Context::Instance();
 
         vk::CommandBufferAllocateInfo allocInfo;
         allocInfo.setCommandPool(pool_)
@@ -43,7 +43,7 @@ namespace cubecraft {
     }
 
     void CommandManager::FreeCmd(const vk::CommandBuffer& cmdBuf) {
-        Context::GetInstance().device.freeCommandBuffers(pool_, cmdBuf);
+        Context::Instance().device.freeCommandBuffers(pool_, cmdBuf);
     }
 
     void CommandManager::ExecuteCmd(vk::Queue queue, RecordCmdFunc func) {
@@ -59,7 +59,7 @@ namespace cubecraft {
         submitInfo.setCommandBuffers(cmdBuf);
         queue.submit(submitInfo);
         queue.waitIdle();
-        Context::GetInstance().device.waitIdle();
+        Context::Instance().device.waitIdle();
         FreeCmd(cmdBuf);
     }
 }

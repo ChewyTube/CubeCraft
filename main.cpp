@@ -58,7 +58,7 @@ int main() {
 
     try {
         cubecraft::Init(window);
-        auto renderer = cubecraft::Context::GetInstance().GetRenderer();
+        auto renderer = cubecraft::Context::Instance().GetRenderer();
 
         while (!glfwWindowShouldClose(window)) {
             renderer->StartRender();

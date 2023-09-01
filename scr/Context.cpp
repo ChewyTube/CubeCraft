@@ -14,9 +14,6 @@ namespace cubecraft {
 	}
 	
 	Context::Context(GLFWwindow* window) {
-		//if (!instance_)instance_.reset(new Context);
-		//instance_ = new (std::nothrow) Context();
-		//std::cout << instance_;
 		createInstance();
 		InitVulkan(window);
 	}
@@ -32,8 +29,6 @@ namespace cubecraft {
 		queryQueueFamilyIndecis();
 		createDevice();
 		getQueues();
-		//swapChain.reset(new SwapChain());
-		//createShader(ReadWholeFile(vertPath), ReadWholeFile(fragPath));
 	}
 	
 	void Context::createInstance() {

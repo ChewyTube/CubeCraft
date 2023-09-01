@@ -13,7 +13,7 @@ namespace cubecraft {
 		fragmentModule = device.createShaderModule(createInfo);
 	}
 	Shader::~Shader() {
-		auto& device = Context::GetInstance().device;
+		auto& device = Context::Instance().device;
 		device.destroyShaderModule(vertexModule);
 		device.destroyShaderModule(fragmentModule);
 	}

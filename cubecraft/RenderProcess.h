@@ -8,7 +8,7 @@ namespace cubecraft {
 		vk::Pipeline graphicsPipelineWithTriangleTopology = nullptr;
 		vk::RenderPass renderPass = nullptr;
 		vk::PipelineLayout layout = nullptr;
-
+		vk::DescriptorSetLayout setLayout = nullptr;
 		
 		void CreateGraphicsPipeline(const Shader& shader);
 		void CreateRenderPass();
@@ -19,8 +19,9 @@ namespace cubecraft {
 		~RenderProcess();
 	private:
 		vk::PipelineLayout createLayout();
-		vk::Pipeline createGraphicsPipeline(const Shader& shader, vk::PrimitiveTopology);
+		vk::Pipeline createGraphicsPipeline(const Shader& shader, vk::PrimitiveTopology topology);
 		vk::RenderPass createRenderPass();
+		vk::DescriptorSetLayout createSetLayout();
 		//vk::PipelineCache createPipelineCache();
 	};
 }
