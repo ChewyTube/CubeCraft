@@ -7,7 +7,7 @@ layout(binding = 0) uniform UBO {
 } ubo;
 
 void main() {
-    outColor = vec4(ubo.color, 1);
+    outColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 /*

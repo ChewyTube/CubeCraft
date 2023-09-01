@@ -2,12 +2,6 @@
 #include "../cubecraft/Context.h"
 
 namespace cubecraft {
-    std::array<Vertex, 3> vertices = {
-            Vertex{0.5, -0.5, 0.0},
-            Vertex{0.5 , 0.5, 0.0},
-            Vertex{-0.5, 0.5, 0.0}
-    };
-
     const Uniform uniform{ Color{1, 0, 0} };
 
 	Renderer::Renderer(int maxFlightCount) : maxFlightCount_(maxFlightCount), curFrame_(0) {
@@ -15,18 +9,16 @@ namespace cubecraft {
         createSems();
         createCmdBuffers();
         createBuffers();
-        bufferVertexData();
         createUniformBuffers();
-        bufferUniformData();
+        bufferData();
         createDescriptorPool();
         allocateSets();
         updateSets();
+
 	}
 	Renderer::~Renderer() {
 		auto& device = Context::Instance().device;
         device.destroyDescriptorPool(descriptorPool_);
-        hostVertexBuffer_.reset();
-        deviceVertexBuffer_.reset();
 		for (auto& sem : imageAvaliableSems_) {
 			device.destroySemaphore(sem);
 		}
@@ -45,6 +37,8 @@ namespace cubecraft {
             throw std::runtime_error("wait for fence failed");
         }
         device.resetFences(fences_[curFrame_]);
+
+        //bufferUniformData();
 
         auto& swapchain = ctx.swapChain;
         auto resultValue = device.acquireNextImageKHR(swapchain->swapchain, std::numeric_limits<std::uint64_t>::max(), imageAvaliableSems_[curFrame_], nullptr);
@@ -98,12 +92,13 @@ namespace cubecraft {
         auto& cmd = cmdBufs_[curFrame_];
         auto& renderProcess = Context::Instance().renderProcess;
         
-        vk::DeviceSize offset = 0;
-        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Context::Instance().renderProcess->layout, 0, sets_[curFrame_], {});
-        cmd.bindVertexBuffers(0, hostVertexBuffer_->buffer, offset);
-        
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, renderProcess->graphicsPipelineWithTriangleTopology);
-        cmd.draw(3, 1, 0, 0);
+        vk::DeviceSize offset = 0;
+        cmd.bindVertexBuffers(0, verticesBuffer_->buffer, offset);
+        cmd.bindIndexBuffer(indicesBuffer_->buffer, 0, vk::IndexType::eUint32);
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Context::Instance().renderProcess->layout, 0, sets_[curFrame_], {});
+
+        cmd.drawIndexed(6, 1, 0, 0, 0);
     }
     
 	void Renderer::createSems() {
@@ -139,41 +134,23 @@ namespace cubecraft {
     }
 
     void Renderer::createBuffers(){
-        hostVertexBuffer_.reset(
-            new Buffer(vk::BufferUsageFlagBits::eVertexBuffer,
-            (size_t)sizeof(vertices),
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-        ));
-        deviceVertexBuffer_.reset(
-            new Buffer(vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-            (size_t)sizeof(vertices),
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        ));
+        auto& device = Context::Instance().device;
 
-        indicesBuffer_.reset(new Buffer(
-            vk::BufferUsageFlagBits::eIndexBuffer,
+        verticesBuffer_.reset(new Buffer(vk::BufferUsageFlagBits::eVertexBuffer,
+            sizeof(float) * 12,//3 * size(float)
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+
+        indicesBuffer_.reset(new Buffer(vk::BufferUsageFlagBits::eIndexBuffer,
             sizeof(float) * 6,
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-        ));
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
     }
-    void Renderer::bufferVertexData(){
-        void* ptr = Context::Instance().device.mapMemory(hostVertexBuffer_->memory, 0, hostVertexBuffer_->size);
-        memcpy(ptr, vertices.data(), sizeof(vertices));
-        Context::Instance().device.unmapMemory(hostVertexBuffer_->memory);
-
-        copyBuffer(hostVertexBuffer_->buffer, deviceVertexBuffer_->buffer,
-            hostVertexBuffer_->size, 0, 0);
+    void Renderer::bufferData() {
+        bufferVertexData();
+        bufferIndicesData();
+        //bufferUniformData();
     }
     void Renderer::createUniformBuffers() {
-        hostUniformBuffer_.resize(maxFlightCount_);
         deviceUniformBuffer_.resize(maxFlightCount_);
-
-        for (auto& buffer : hostUniformBuffer_) {
-            buffer.reset(new Buffer(
-                vk::BufferUsageFlagBits::eTransferSrc,
-                sizeof(uniform),
-                vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible));
-        }
 
         for (auto& buffer : deviceUniformBuffer_) {
             buffer.reset(new Buffer(
@@ -182,7 +159,26 @@ namespace cubecraft {
                 vk::MemoryPropertyFlagBits::eDeviceLocal));
         }
     }
+    void Renderer::bufferVertexData(){
+        Vertex vertices[] = {
+        Vertex{-0.5, -0.5, 0.0},
+        Vertex{0.5,  -0.5, 0.0},
+        Vertex{0.5,  0.5,  0.0},
+        Vertex{-0.5, 0.5,  0.0},
+        };
+        auto& device = Context::Instance().device;
+        memcpy(verticesBuffer_->map, vertices, sizeof(vertices));
+    }
+    void Renderer::bufferIndicesData() {
+        std::uint32_t indices[] = {
+        0, 1, 3,
+        1, 2, 3,
+        };
+        auto& device = Context::Instance().device;
+        memcpy(indicesBuffer_->map, indices, sizeof(indices));
+    }
     void Renderer::bufferUniformData() {
+        /*
         for (int i = 0; i < hostUniformBuffer_.size(); i++) {
             auto& buffer = hostUniformBuffer_[i];
             void* ptr = Context::Instance().device.mapMemory(buffer->memory, 0, buffer->size);
@@ -190,6 +186,13 @@ namespace cubecraft {
             Context::Instance().device.unmapMemory(buffer->memory);
 
             copyBuffer(buffer->buffer, deviceUniformBuffer_[i]->buffer, buffer->size, 0, 0);
+        }
+        */
+        auto& device = Context::Instance().device;
+        for (int i = 0; i < deviceUniformBuffer_.size(); i++) {
+            auto& buffer = deviceUniformBuffer_[i];
+            memcpy(buffer->map, (void*) & uniform, sizeof(uniform));
+            
         }
     }
 
@@ -252,6 +255,25 @@ namespace cubecraft {
 
         Context::Instance().device.waitIdle();
 
+        Context::Instance().commandManager->FreeCmd(cmdBuf);
+    }
+    void Renderer::transformBuffer_To_Device(Buffer& src, Buffer& dst, size_t srcOffset, size_t dstOffset, size_t size) {
+        auto cmdBuf = Context::Instance().commandManager->CreateOneCommandBuffer();
+        vk::CommandBufferBeginInfo beginInfo;
+        beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        cmdBuf.begin(beginInfo);
+        vk::BufferCopy region;
+        region.setSrcOffset(srcOffset)
+            .setDstOffset(dstOffset)
+            .setSize(size);
+        cmdBuf.copyBuffer(src.buffer, dst.buffer, region);
+        cmdBuf.end();
+
+        vk::SubmitInfo submitInfo;
+        submitInfo.setCommandBuffers(cmdBuf);
+        Context::Instance().graphicsQueue.submit(submitInfo);
+        Context::Instance().graphicsQueue.waitIdle();
+        Context::Instance().device.waitIdle();
         Context::Instance().commandManager->FreeCmd(cmdBuf);
     }
 }

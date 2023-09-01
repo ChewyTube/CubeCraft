@@ -25,9 +25,6 @@ namespace cubecraft {
 		std::vector<vk::Semaphore> renderFinishSems_;
 		std::vector<vk::CommandBuffer> cmdBufs_;
 
-		std::unique_ptr<Buffer> hostVertexBuffer_;
-		std::unique_ptr<Buffer> deviceVertexBuffer_;
-		std::vector<std::unique_ptr<Buffer>> hostUniformBuffer_;
 		std::vector<std::unique_ptr<Buffer>> deviceUniformBuffer_;
 
 		std::unique_ptr<Buffer> verticesBuffer_;
@@ -42,12 +39,16 @@ namespace cubecraft {
 		void createBuffers();
 		void createUniformBuffers();
 		void bufferVertexData();
+		void bufferIndicesData();
 		void bufferUniformData();
+
+		void bufferData();
 
 		void createDescriptorPool();
 		void allocateSets();
 		void updateSets();
 
 		void copyBuffer(vk::Buffer& src, vk::Buffer& dst, size_t size, size_t srcOffset, size_t dstOffset);
+		void transformBuffer_To_Device(Buffer& src, Buffer& dst, size_t srcOffset, size_t dstOffset, size_t size);
 	};
 }

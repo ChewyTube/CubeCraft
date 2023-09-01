@@ -54,7 +54,7 @@ namespace cubecraft {
 				.setAllocationSize(info.size);
 		memory = Context::Instance().device.allocateMemory(allocate);
 	} 
-	void Buffer::bindinfMemory_To_Buffer() {
+	void Buffer::bindingMemory_To_Buffer() {
 		Context::Instance().device.bindBufferMemory(buffer, memory, 0);
 	}
 

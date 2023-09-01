@@ -22,7 +22,7 @@ namespace cubecraft {
 
 		void createBuffer(size_t size, vk::BufferUsageFlags usage);
 		void allocateMemory(MemoryInfo info);
-		void bindinfMemory_To_Buffer();
+		void bindingMemory_To_Buffer();
 		MemoryInfo queryMemoryInfo(vk::MemoryPropertyFlags property);
 		std::uint32_t queryBufferMemTypeIndex(std::uint32_t type, vk::MemoryPropertyFlags flag);
 	};
