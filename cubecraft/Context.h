@@ -13,6 +13,8 @@
 #include "Renderer.h"
 #include "CommandManager.h"
 
+#include "Camera.h"
+
 #include "Utils/ReadWholeFile.h"
 
 namespace cubecraft{
@@ -54,6 +56,7 @@ namespace cubecraft{
 
 		void InitVulkan(GLFWwindow* window);
 
+		Camera camera;
 
 		vk::Instance instance;//VulkanÊµÀý
 		vk::ShaderModule vertexModule;

@@ -60,7 +60,7 @@ namespace cubecraft {
 		vk::PipelineRasterizationStateCreateInfo rastStage;
 		rastStage.setRasterizerDiscardEnable(false);
 		rastStage.setCullMode(vk::CullModeFlagBits::eBack);
-		rastStage.setFrontFace(vk::FrontFace::eClockwise);
+		rastStage.setFrontFace(vk::FrontFace::eCounterClockwise);
 		rastStage.setPolygonMode(vk::PolygonMode::eFill);
 		rastStage.setLineWidth(1);
 		createInfo.setPRasterizationState(&rastStage);

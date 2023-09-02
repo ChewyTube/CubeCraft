@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Vulkan\Vulkan\Include;D:\Vulkan\Env\glfw-3.3.8\glfw-3.3.8\include;D:\Vulkan\Env\glm;D:\Vulkan\Env;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Vulkan\Vulkan\Include;D:\Vulkan\Env\glfw-3.3.8\glfw-3.3.8\include;D:\Vulkan\Env\glm;D:\Vulkan\Env;D:\Vulkan\Env\GLAD\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Vulkan\Vulkan\Include;D:\Vulkan\Env\glfw-3.3.8\glfw-3.3.8\include;D:\Vulkan\Env\glm;D:\Vulkan\Env;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Vulkan\Vulkan\Include;D:\Vulkan\Env\glfw-3.3.8\glfw-3.3.8\include;D:\Vulkan\Env\glm;D:\Vulkan\Env;D:\Vulkan\Env\GLAD\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -135,7 +135,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="scr\Buffer.cpp" />
+    <ClCompile Include="scr\CommandManager.cpp" />
+    <ClCompile Include="scr\Context.cpp" />
+    <ClCompile Include="scr\Layers.cpp" />
+    <ClCompile Include="scr\Renderer.cpp" />
+    <ClCompile Include="scr\RenderProcess.cpp" />
+    <ClCompile Include="scr\Shader.cpp" />
+    <ClCompile Include="scr\SwapChain.cpp" />
+    <ClCompile Include="scr\Utils\ReadWholeFile.cpp" />
+    <ClCompile Include="scr\Vertex.cpp" />
     <ClCompile Include="Source\Utils\GetTimeStamp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -146,7 +157,30 @@
     <None Include="shaders\vert.spv" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\CubeCraft\CubeCraft\CubeCraft\Headers\Camera.h" />
+    <ClInclude Include="cubecraft\Buffer.h" />
+    <ClInclude Include="cubecraft\Camera.h" />
+    <ClInclude Include="cubecraft\CommandManager.h" />
+    <ClInclude Include="cubecraft\Context.h" />
+    <ClInclude Include="cubecraft\CubeCraft.h" />
+    <ClInclude Include="cubecraft\Renderer.h" />
+    <ClInclude Include="cubecraft\RenderProcess.h" />
+    <ClInclude Include="cubecraft\Shader.h" />
+    <ClInclude Include="cubecraft\SwapChain.h" />
+    <ClInclude Include="cubecraft\Uniform.h" />
+    <ClInclude Include="cubecraft\Vertex.h" />
+    <ClInclude Include="cubecraft\Utils\ReadWholeFile.h" />
+    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\KeyboardInput.h" />
     <ClInclude Include="Source\Utils\GetTimeStamp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\bedrock.png" />
+    <Image Include="textures\diamond_pickaxe.png" />
+    <Image Include="textures\dirt.png" />
+    <Image Include="textures\test.png" />
+    <Image Include="textures\texture.jpg" />
+    <Image Include="textures\牛.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

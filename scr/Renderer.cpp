@@ -1,6 +1,8 @@
 #include "../cubecraft/Renderer.h"
 #include "../cubecraft/Context.h"
 
+#include <chrono>
+
 namespace cubecraft {
     const Uniform uniform{ Color{1, 0, 0} };
 
@@ -38,7 +40,7 @@ namespace cubecraft {
         }
         device.resetFences(fences_[curFrame_]);
 
-        //bufferUniformData();
+        bufferMVPData();
 
         auto& swapchain = ctx.swapChain;
         auto resultValue = device.acquireNextImageKHR(swapchain->swapchain, std::numeric_limits<std::uint64_t>::max(), imageAvaliableSems_[curFrame_], nullptr);
@@ -150,12 +152,28 @@ namespace cubecraft {
         //bufferUniformData();
     }
     void Renderer::createUniformBuffers() {
+        /*
         deviceUniformBuffer_.resize(maxFlightCount_);
 
         for (auto& buffer : deviceUniformBuffer_) {
             buffer.reset(new Buffer(
                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eUniformBuffer,
                 sizeof(uniform),
+                vk::MemoryPropertyFlagBits::eDeviceLocal));
+        }
+        */
+        uniformBuffers_.resize(maxFlightCount_);
+        
+        size_t size = sizeof(MVP);
+        for (auto& buffer : uniformBuffers_) {
+            buffer.reset(new Buffer(vk::BufferUsageFlagBits::eTransferSrc,
+                size,
+                vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+        }
+        deviceUniformBuffers_.resize(maxFlightCount_);
+        for (auto& buffer : deviceUniformBuffers_) {
+            buffer.reset(new Buffer(vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eUniformBuffer,
+                size,
                 vk::MemoryPropertyFlagBits::eDeviceLocal));
         }
     }
@@ -171,14 +189,15 @@ namespace cubecraft {
     }
     void Renderer::bufferIndicesData() {
         std::uint32_t indices[] = {
-        0, 1, 3,
-        1, 2, 3,
+        0, 1, 2,
+        2, 3, 0
         };
         auto& device = Context::Instance().device;
         memcpy(indicesBuffer_->map, indices, sizeof(indices));
     }
+    /*
     void Renderer::bufferUniformData() {
-        /*
+        
         for (int i = 0; i < hostUniformBuffer_.size(); i++) {
             auto& buffer = hostUniformBuffer_[i];
             void* ptr = Context::Instance().device.mapMemory(buffer->memory, 0, buffer->size);
@@ -187,12 +206,36 @@ namespace cubecraft {
 
             copyBuffer(buffer->buffer, deviceUniformBuffer_[i]->buffer, buffer->size, 0, 0);
         }
-        */
+        
         auto& device = Context::Instance().device;
         for (int i = 0; i < deviceUniformBuffer_.size(); i++) {
             auto& buffer = deviceUniformBuffer_[i];
             memcpy(buffer->map, (void*) & uniform, sizeof(uniform));
             
+        }
+    }
+    */
+    
+    void Renderer::bufferMVPData() {
+        static auto startTime = std::chrono::high_resolution_clock::now();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+        MVP mvp;
+        /*
+        
+        */
+        mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        mvp.view  = Context::Instance().camera.GetViewMatrix();
+        mvp.proj  = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        mvp.proj[1][1] *= -1;
+        
+        auto& device = Context::Instance().device;
+        for (int i = 0; i < uniformBuffers_.size(); i++) {
+            auto& buffer = uniformBuffers_[i];
+            memcpy(buffer->map, (void*)&mvp, sizeof(mvp));
+            transformBuffer_To_Device(*buffer, *deviceUniformBuffers_[i], 0, 0, buffer->size);
         }
     }
 
@@ -221,9 +264,9 @@ namespace cubecraft {
         for (int i = 0; i < sets_.size(); i++) {
             auto& set = sets_[i];
             vk::DescriptorBufferInfo bufferInfo;
-            bufferInfo.setBuffer(deviceUniformBuffer_[i]->buffer);
+            bufferInfo.setBuffer(deviceUniformBuffers_[i]->buffer);
             bufferInfo.setOffset(0);
-            bufferInfo.setRange(deviceUniformBuffer_[i]->size);
+            bufferInfo.setRange(deviceUniformBuffers_[i]->size);
 
             vk::WriteDescriptorSet writer;
             writer.setDescriptorType(vk::DescriptorType::eUniformBuffer);

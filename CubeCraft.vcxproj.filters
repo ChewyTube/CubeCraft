@@ -15,10 +15,43 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Utils\GetTimeStamp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Context.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utils\GetTimeStamp.cpp">
+    <ClCompile Include="scr\Layers.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\SwapChain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Utils\ReadWholeFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\RenderProcess.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\CommandManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Vertex.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Buffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,5 +68,70 @@
     <ClInclude Include="Source\Utils\GetTimeStamp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\KeyboardInput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Context.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Utils\ReadWholeFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\RenderProcess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\CubeCraft.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\SwapChain.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\CommandManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Vertex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Buffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Uniform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\CubeCraft\CubeCraft\CubeCraft\Headers\Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\bedrock.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="textures\diamond_pickaxe.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="textures\dirt.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="textures\test.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="textures\texture.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="textures\牛.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

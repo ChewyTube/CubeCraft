@@ -7,42 +7,69 @@
 
 #include "cubecraft/CubeCraft.h"
 
-/*
-class CubeCraft {
-public:
-    void run() {
-        Init();
-        Quit();
+float lastX = cubecraft::WIDTH / 2.0f;
+float lastY = cubecraft::HEIGHT / 2.0f;
+bool firstMouse = true;
+
+//键盘输入
+void processInput(GLFWwindow* window)
+{
+    auto& camera = cubecraft::Context::Instance().camera;
+    auto deltaTime = 0.0025f;
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
     }
 
-private:
-    cubecraft::Context context;
+    float cameraSpeed = 0.0025f; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(UPWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(DOWNWARD, deltaTime);
+    }
+}
+//鼠标输入
+static void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    auto& camera = cubecraft::Context::Instance().camera;
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
 
-    void Init() {
-        context.Init();
-    }
-    void Quit() {
-        context.Quit();
-    }
-
-    void initWindow() {
-        context.InitWindow();
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
     }
 
-    void initVulkan() {
-        context.InitVulkan();
-    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
-    void mainLoop() {
-        context.MainLoop();
-    }
+    lastX = xpos;
+    lastY = ypos;
 
-    void cleanup() {
-        context.QuitVulkan();
-        context.QuitWindow();
-    }
-};
-*/
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
 
 int main() {
     float w = cubecraft::WIDTH;
@@ -56,21 +83,20 @@ int main() {
 
     window = glfwCreateWindow(cubecraft::WIDTH, cubecraft::HEIGHT, "Vulkan", nullptr, nullptr);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);//隐藏光标
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//显示光标
+    glfwSetCursorPosCallback(window, cursor_position_callback);//鼠标回调函数
+
     try {
         cubecraft::Init(window);
         auto renderer = cubecraft::Context::Instance().GetRenderer();
 
         while (!glfwWindowShouldClose(window)) {
             renderer->StartRender();
-            //renderer.SetDrawColor(cubecraft::Color{1, 0, 0});
-            //renderer.DrawTexture(cubecraft::Rect{cubecraft::Vec{x, y}, cubecraft::Size{200, 300}}, * texture1);
-            //renderer.SetDrawColor(cubecraft::Color{0, 1, 0});
-            //renderer.DrawTexture(cubecraft::Rect{cubecraft::Vec{500, 100}, cubecraft::Size{200, 300}}, * texture2);
-            //renderer.SetDrawColor(cubecraft::Color{0, 0, 1});
-            //renderer.DrawLine(cubecraft::Vec{0, 0}, cubecraft::Vec{w, h});
             renderer->render();
             renderer->EndRender();
 
+            processInput(window);
             glfwPollEvents();
         }
         

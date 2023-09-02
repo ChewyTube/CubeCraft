@@ -16,7 +16,7 @@ namespace cubecraft {
 			vk::DescriptorSetLayoutBinding binding;
 			binding.setBinding(0);
 			binding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
-			binding.setStageFlags(vk::ShaderStageFlagBits::eFragment);
+			binding.setStageFlags(vk::ShaderStageFlagBits::eVertex);
 			binding.setDescriptorCount(1);
 
 			return binding;

@@ -1,5 +1,9 @@
 #pragma once
 
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <vulkan/vulkan.hpp>
 #include "Vertex.h"
 #include "Buffer.h"
@@ -17,6 +21,12 @@ namespace cubecraft {
 		//void DrawTexture(const Rect& rect, Texture& texture);
 		void render();
 	private:
+		struct MVP {
+			alignas(16) glm::mat4 model = glm::mat4(1.0f);
+			alignas(16) glm::mat4 view  = glm::mat4(1.0f);
+			alignas(16) glm::mat4 proj  = glm::mat4(1.0f);
+		};
+
 		int maxFlightCount_;
 		int curFrame_;
 		uint32_t imageIndex_;
@@ -25,7 +35,8 @@ namespace cubecraft {
 		std::vector<vk::Semaphore> renderFinishSems_;
 		std::vector<vk::CommandBuffer> cmdBufs_;
 
-		std::vector<std::unique_ptr<Buffer>> deviceUniformBuffer_;
+		std::vector<std::unique_ptr<Buffer>> uniformBuffers_;
+		std::vector<std::unique_ptr<Buffer>> deviceUniformBuffers_;
 
 		std::unique_ptr<Buffer> verticesBuffer_;
 		std::unique_ptr<Buffer> indicesBuffer_;
@@ -40,7 +51,8 @@ namespace cubecraft {
 		void createUniformBuffers();
 		void bufferVertexData();
 		void bufferIndicesData();
-		void bufferUniformData();
+		//void bufferUniformData();
+		void bufferMVPData();
 
 		void bufferData();
 
