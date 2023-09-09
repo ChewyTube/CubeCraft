@@ -26,8 +26,8 @@ namespace cubecraft {
 
 		//1.¶¥µãÊäÈë
 		vk::PipelineVertexInputStateCreateInfo inputState;
-		auto attr = Vertex::getAttribute();
-		auto bind = Vertex::getBinding();
+		auto attr = Vertex::getAttributeDescriptions();
+		auto bind = Vertex::getBindingDescription();
 		inputState.setVertexAttributeDescriptions(attr);
 		inputState.setVertexBindingDescriptions(bind);
 		createInfo.setPVertexInputState(&inputState);
@@ -104,7 +104,10 @@ namespace cubecraft {
 	}
 	vk::PipelineLayout RenderProcess::createLayout() {
 		vk::PipelineLayoutCreateInfo createInfo;
-		createInfo.setSetLayouts(setLayout);
+
+		auto range = Context::Instance().shader->GetPushConstantRange();
+		createInfo.setSetLayouts(Context::Instance().shader->GetDescriptorSetLayouts());
+		createInfo.setPushConstantRanges(range);
 
 		return Context::Instance().device.createPipelineLayout(createInfo);
 	}

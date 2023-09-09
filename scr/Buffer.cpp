@@ -74,7 +74,7 @@ namespace cubecraft {
 
 		return info;
 	}
-	std::uint32_t Buffer::queryBufferMemTypeIndex(std::uint32_t type, vk::MemoryPropertyFlags flag) {
+	std::uint32_t queryBufferMemTypeIndex(std::uint32_t type, vk::MemoryPropertyFlags flag) {
 		auto property = Context::Instance().phyDevice.getMemoryProperties();
 
 		for (std::uint32_t i = 0; i < property.memoryTypeCount; i++) {

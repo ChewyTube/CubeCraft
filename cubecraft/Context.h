@@ -89,8 +89,6 @@ namespace cubecraft{
 			return Context::Instance().renderer.get();
 		}
 
-		//------------------------Shader.cpp------------------------
-		void createShader(const std::string& vertSource, const std::string& fragSource);
 	private:
 		static std::unique_ptr<Context> instance_;
 

@@ -11,35 +11,41 @@ namespace cubecraft {
 		createInfo.setCodeSize(fragSource.size());
 		createInfo.setPCode((uint32_t*)fragSource.data());
 		fragmentModule = device.createShaderModule(createInfo);
+
+		initDescriptorSetLayouts();
 	}
 	Shader::~Shader() {
 		auto& device = Context::Instance().device;
-		device.destroyShaderModule(vertexModule);
-		device.destroyShaderModule(fragmentModule);
-	}
-	
-	void Context::createShader(const std::string& vertSource, const std::string& fragSource) {
-		vk::ShaderModuleCreateInfo createInfo;
-		createInfo.setCodeSize(vertSource.size());
-		createInfo.setPCode((uint32_t*)vertSource.data());
-		vertexModule = device.createShaderModule(createInfo);
-
-		createInfo.setCodeSize(fragSource.size());
-		createInfo.setPCode((uint32_t*)fragSource.data());
-		fragmentModule = device.createShaderModule(createInfo);
-	}
-	/*
-	void Context::destroyShader() {
+		for (auto& layout : layouts_) {
+			device.destroyDescriptorSetLayout(layout);
+		}
+		layouts_.clear();
 		device.destroyShaderModule(vertexModule);
 		device.destroyShaderModule(fragmentModule);
 	}
 
-	
-	Shader::~Shader() {
-		auto device = Context::GetInstance().device;
-		device.destroyShaderModule(vertexModule);
-		device.destroyShaderModule(fragmentModule);
+	void Shader::initDescriptorSetLayouts() {
+		vk::DescriptorSetLayoutCreateInfo createInfo;
+		std::vector<vk::DescriptorSetLayoutBinding> bindings(2);
+		bindings[0].setBinding(0)
+			.setDescriptorCount(1)
+			.setDescriptorType(vk::DescriptorType::eUniformBuffer)
+			.setStageFlags(vk::ShaderStageFlagBits::eVertex);
+		bindings[1].setBinding(1) 
+			.setDescriptorCount(1)
+			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+			.setStageFlags(vk::ShaderStageFlagBits::eFragment);
+
+		createInfo.setBindings(bindings);
+
+		layouts_.push_back(Context::Instance().device.createDescriptorSetLayout(createInfo));
 	}
-	*/
-	
+
+	vk::PushConstantRange Shader::GetPushConstantRange() const {
+		vk::PushConstantRange range;
+		range.setOffset(0)
+			.setSize(sizeof(glm::mat4))
+			.setStageFlags(vk::ShaderStageFlagBits::eVertex);
+		return range;
+	}
 }

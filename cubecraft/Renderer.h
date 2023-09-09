@@ -8,6 +8,7 @@
 #include "Vertex.h"
 #include "Buffer.h"
 #include "Uniform.h"
+#include "Texture.h"
 
 namespace cubecraft {
 	class Renderer final {
@@ -22,9 +23,9 @@ namespace cubecraft {
 		void render();
 	private:
 		struct MVP {
-			alignas(16) glm::mat4 model = glm::mat4(1.0f);
-			alignas(16) glm::mat4 view  = glm::mat4(1.0f);
-			alignas(16) glm::mat4 proj  = glm::mat4(1.0f);
+			glm::mat4 model = glm::mat4(1.0f);
+			glm::mat4 view  = glm::mat4(1.0f);
+			glm::mat4 proj  = glm::mat4(1.0f);
 		};
 
 		int maxFlightCount_;
@@ -44,21 +45,26 @@ namespace cubecraft {
 		vk::DescriptorPool descriptorPool_;
 		std::vector<vk::DescriptorSet> sets_;
 
+		std::unique_ptr<Texture> texture;
+		vk::Sampler sampler;
+
 		void createSems();
 		void createFence();
 		void createCmdBuffers();
 		void createBuffers();
 		void createUniformBuffers();
+		void createTexture();
+		void createSampler();
 		void bufferVertexData();
 		void bufferIndicesData();
-		//void bufferUniformData();
 		void bufferMVPData();
 
 		void bufferData();
 
 		void createDescriptorPool();
-		void allocateSets();
-		void updateSets();
+		std::vector<vk::DescriptorSet> allocDescriptorSet(int maxFlight);
+		void allocDescriptorSets();
+		void updateDescriptorSets();
 
 		void copyBuffer(vk::Buffer& src, vk::Buffer& dst, size_t size, size_t srcOffset, size_t dstOffset);
 		void transformBuffer_To_Device(Buffer& src, Buffer& dst, size_t srcOffset, size_t dstOffset, size_t size);
