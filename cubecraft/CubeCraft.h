@@ -13,9 +13,12 @@ namespace cubecraft {
 		ctx.initGraphicsPipeline();
 		ctx.swapChain->createFrameBuffers();
 		ctx.initCommandPool();
-		ctx.initRenderer();
+		ctx.initSampler();
 		
+		int maxFlightCount = 2;
+		DescriptorSetManager::Init(maxFlightCount);
 
+		ctx.initRenderer();
 	}
 	static void Quit() {
 		Context::Instance().device.waitIdle();
@@ -28,5 +31,13 @@ namespace cubecraft {
 		Context::Instance().swapChain.reset();
 
 		Context::Quit();
+	}
+
+	Texture* LoadTexture(const std::string& filename) {
+		return TextureManager::Instance().Load(filename);
+	}
+
+	void DestroyTexture(Texture* texture) {
+		TextureManager::Instance().Destroy(texture);
 	}
 }

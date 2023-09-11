@@ -8,7 +8,7 @@ namespace cubecraft {
     Texture::Texture(std::string_view filename) {
         int w, h, channel;
         stbi_uc* pixels = stbi_load(filename.data(), &w, &h, &channel, STBI_rgb_alpha);
-        size_t size = w * h * 4;
+        size_t size = static_cast<size_t>(w) * h * 4;
 
         if (!pixels) {
             throw std::runtime_error("image load failed");
@@ -30,8 +30,11 @@ namespace cubecraft {
         createImageView();
 
         stbi_image_free(pixels);
-    }
 
+        set = DescriptorSetManager::Instance().AllocImageSet();
+
+        updateDescriptorSet();
+    }
     Texture::~Texture() {
         auto& device = Context::Instance().device;
         device.destroyImageView(view);
@@ -52,7 +55,6 @@ namespace cubecraft {
             .setSamples(vk::SampleCountFlagBits::e1);
         image = Context::Instance().device.createImage(createInfo);
     }
-
     void Texture::allocMemory() {
         auto& device = Context::Instance().device;
         vk::MemoryAllocateInfo allocInfo;
@@ -65,7 +67,6 @@ namespace cubecraft {
 
         memory = device.allocateMemory(allocInfo);
     }
-
     void Texture::transformData_To_Image(Buffer& buffer, uint32_t w, uint32_t h) {
         Context::Instance().commandManager->ExecuteCmd(Context::Instance().graphicsQueue,
             [&](vk::CommandBuffer cmdBuf) {
@@ -108,7 +109,6 @@ namespace cubecraft {
                     {}, {}, nullptr, barrier);
             });
     }
-
     void Texture::transitionImageLayoutFromDst_To_Optimal() {
         Context::Instance().commandManager->ExecuteCmd(Context::Instance().graphicsQueue,
             [&](vk::CommandBuffer cmdBuf) {
@@ -147,5 +147,40 @@ namespace cubecraft {
             .setFormat(vk::Format::eR8G8B8A8Srgb)
             .setSubresourceRange(range);
         view = Context::Instance().device.createImageView(createInfo);
+    }
+    void Texture::updateDescriptorSet() {
+        vk::WriteDescriptorSet writer;
+        vk::DescriptorImageInfo imageInfo;
+        imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+            .setImageView(view)
+            .setSampler(Context::Instance().sampler);
+        writer.setImageInfo(imageInfo)
+            .setDstBinding(0)
+            .setDstArrayElement(0)
+            .setDstSet(set.set)
+            .setDescriptorCount(1)
+            .setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+        Context::Instance().device.updateDescriptorSets(writer, {});
+    }
+
+    std::unique_ptr<TextureManager> TextureManager::instance_ = nullptr;
+
+    Texture* TextureManager::Load(const std::string& filename) {
+        datas_.push_back(std::unique_ptr<Texture>(new Texture(filename)));
+        return datas_.back().get();
+    }
+    void TextureManager::Clear() {
+        datas_.clear();
+    }
+    void TextureManager::Destroy(Texture* texture) {
+        auto it = std::find_if(datas_.begin(), datas_.end(),
+            [&](const std::unique_ptr<Texture>& t) {
+                return t.get() == texture;
+            });
+        if (it != datas_.end()) {
+            Context::Instance().device.waitIdle();
+            datas_.erase(it);
+            return;
+        }
     }
 }

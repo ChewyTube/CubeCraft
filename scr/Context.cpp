@@ -145,4 +145,19 @@ namespace cubecraft {
 		auto fragSource = readFile(fragPath);
 		shader = std::make_unique<Shader>(device, vertexSource, fragSource);
 	}
+
+	void Context::initSampler() {
+		vk::SamplerCreateInfo createInfo;
+		createInfo.setMagFilter(vk::Filter::eNearest)
+			.setMinFilter(vk::Filter::eNearest)
+			.setAddressModeU(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeV(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeW(vk::SamplerAddressMode::eRepeat)
+			.setAnisotropyEnable(false)
+			.setBorderColor(vk::BorderColor::eIntOpaqueBlack)
+			.setUnnormalizedCoordinates(false)
+			.setCompareEnable(false)
+			.setMipmapMode(vk::SamplerMipmapMode::eNearest);
+		sampler = Context::Instance().device.createSampler(createInfo);
+	}
 }

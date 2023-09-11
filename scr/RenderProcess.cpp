@@ -77,12 +77,21 @@ namespace cubecraft {
 		//8.混合
 		vk::PipelineColorBlendStateCreateInfo blendState;
 		vk::PipelineColorBlendAttachmentState attachState;
-		attachState.setBlendEnable(false);
+		attachState.setBlendEnable(true);
 		attachState.setColorWriteMask(
 			vk::ColorComponentFlagBits::eR |
 			vk::ColorComponentFlagBits::eG |
 			vk::ColorComponentFlagBits::eB |
 			vk::ColorComponentFlagBits::eA);
+
+		//实现透明 BV1hK411k7j7
+		attachState.setSrcColorBlendFactor(vk::BlendFactor::eOne);
+		attachState.setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
+		attachState.setColorBlendOp(vk::BlendOp::eAdd);
+		attachState.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+		attachState.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+		attachState.setColorBlendOp(vk::BlendOp::eAdd); 
+
 		blendState.setLogicOpEnable(false);
 		blendState.setLogicOp(vk::LogicOp::eCopy);
 		blendState.setAttachmentCount(1);

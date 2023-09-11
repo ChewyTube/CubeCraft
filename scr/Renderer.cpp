@@ -1,5 +1,6 @@
 #include "../cubecraft/Renderer.h"
 #include "../cubecraft/Context.h"
+#include "../cubecraft/Block.h"
 
 #include <chrono>
 
@@ -13,15 +14,11 @@ namespace cubecraft {
         createBuffers();
         createUniformBuffers();
         bufferData();
-        createTexture();
-        createSampler();
-        createDescriptorPool();
-        allocDescriptorSets();
+        descriptorSets_ = DescriptorSetManager::Instance().AllocBufferSets(maxFlightCount);
         updateDescriptorSets();
 	}
 	Renderer::~Renderer() {
 		auto& device = Context::Instance().device;
-        device.destroySampler(sampler);
         texture.reset();
         device.destroyDescriptorPool(descriptorPool_);
         verticesBuffer_.reset();
@@ -97,15 +94,18 @@ namespace cubecraft {
 
         curFrame_ = (curFrame_ + 1) % maxFlightCount_;
     }
-    void Renderer::render() {
+    void Renderer::DrawTexture(Texture& texture) {
         auto& cmd = cmdBufs_[curFrame_];
         auto& renderProcess = Context::Instance().renderProcess;
         
-        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, renderProcess->graphicsPipelineWithTriangleTopology);
         vk::DeviceSize offset = 0;
         cmd.bindVertexBuffers(0, verticesBuffer_->buffer, offset);
         cmd.bindIndexBuffer(indicesBuffer_->buffer, 0, vk::IndexType::eUint32);
-        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, Context::Instance().renderProcess->layout, 0, sets_[curFrame_], {});
+
+        auto& layout = Context::Instance().renderProcess->layout;
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, {descriptorSets_[curFrame_].set, texture.set.set}, {});
+
+        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, renderProcess->graphicsPipelineWithTriangleTopology);
 
         cmd.drawIndexed(6, 1, 0, 0, 0);
     }
@@ -142,20 +142,6 @@ namespace cubecraft {
         }
     }
 
-    void Renderer::createSampler() {
-        vk::SamplerCreateInfo createInfo;
-        createInfo.setMagFilter(vk::Filter::eNearest)
-            .setMinFilter(vk::Filter::eNearest)
-            .setAddressModeU(vk::SamplerAddressMode::eRepeat)
-            .setAddressModeV(vk::SamplerAddressMode::eRepeat)
-            .setAddressModeW(vk::SamplerAddressMode::eRepeat)
-            .setAnisotropyEnable(false)
-            .setBorderColor(vk::BorderColor::eIntOpaqueBlack)
-            .setUnnormalizedCoordinates(false)
-            .setCompareEnable(false)
-            .setMipmapMode(vk::SamplerMipmapMode::eNearest);
-        sampler = Context::Instance().device.createSampler(createInfo);
-    }
 
     void Renderer::createBuffers(){
         auto& device = Context::Instance().device;
@@ -189,19 +175,22 @@ namespace cubecraft {
         }
     }
     void Renderer::bufferVertexData(){
-        const Vertex vertices[] = {
+        const Vertex vertices1[4] = {
             {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}},
             {{0.5f,  -0.5f, 0.0f}, {1.0f, 0.0f}},
             {{0.5f,  0.5f,  0.0f}, {1.0f, 1.0f}},
             {{-0.5f, 0.5f,  0.0f}, {0.0f, 1.0f}},
         };
+        auto face = DOWN;
+        const Vertex vertices[4] = { getVertices(face, 0, 0, 0)[0], getVertices(face, 0, 0, 0)[1], getVertices(face, 0, 0, 0)[2], getVertices(face, 0, 0, 0)[3] };
+        //vertices = getVertices(UP, 0, 0, 0).vertices;
         auto& device = Context::Instance().device;
         memcpy(verticesBuffer_->map, vertices, sizeof(vertices));
     }
     void Renderer::bufferIndicesData() {
         std::uint32_t indices[] = {
-        0, 1, 3,
-        1, 2, 3
+        0, 1, 2,
+        3, 2, 1
         };
         auto& device = Context::Instance().device;
         memcpy(indicesBuffer_->map, indices, sizeof(indices));
@@ -252,39 +241,22 @@ namespace cubecraft {
         allocInfo.setSetLayouts(layouts);
         return Context::Instance().device.allocateDescriptorSets(allocInfo);
     }
-    void Renderer::allocDescriptorSets() {
-        sets_ = allocDescriptorSet(maxFlightCount_);
-    }
 
     void Renderer::updateDescriptorSets() {
-        for (int i = 0; i < sets_.size(); i++) {
+        for (int i = 0; i < descriptorSets_.size(); i++) {
             // bind MVP buffer
             vk::DescriptorBufferInfo mvpBufferInfo;
             mvpBufferInfo.setBuffer(deviceUniformBuffers_[i]->buffer)
                 .setOffset(0)
                 .setRange(sizeof(MVP));
 
-            std::vector<vk::WriteDescriptorSet> writeInfos(2);
+            std::vector<vk::WriteDescriptorSet> writeInfos(1);
             writeInfos[0].setBufferInfo(mvpBufferInfo)
                 .setDstBinding(0)
                 .setDescriptorType(vk::DescriptorType::eUniformBuffer)
                 .setDescriptorCount(1)
                 .setDstArrayElement(0)
-                .setDstSet(sets_[i]);
-
-            // bind image
-            vk::DescriptorImageInfo imageInfo;
-            imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
-                .setImageView(texture->view)
-                .setSampler(sampler);
-
-            writeInfos[1].setImageInfo(imageInfo)
-                .setDstBinding(1)
-                .setDescriptorCount(1)
-                .setDstArrayElement(0)
-                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                .setDstSet(sets_[i]);
-
+                .setDstSet(descriptorSets_[i].set);
             Context::Instance().device.updateDescriptorSets(writeInfos, {});
         }
     }

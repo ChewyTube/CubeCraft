@@ -73,6 +73,7 @@ namespace cubecraft{
 		std::unique_ptr<RenderProcess> renderProcess;
 		std::unique_ptr<CommandManager> commandManager;
 		std::unique_ptr<Shader> shader;
+		vk::Sampler sampler;
 
 		bool fiestTime = true;
 
@@ -82,7 +83,7 @@ namespace cubecraft{
 		void initCommandPool();
 		void initShaderModules();
 		void initRenderer();
-		//void initSampler();
+		void initSampler();
 		//void getSurface();
 
 		Renderer* GetRenderer() {
@@ -91,11 +92,7 @@ namespace cubecraft{
 
 	private:
 		static std::unique_ptr<Context> instance_;
-
-		//RenderProcess renderProcess;
-
 		Context(GLFWwindow* window);
-
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_LUNARG_standard_validation"
@@ -106,10 +103,8 @@ namespace cubecraft{
 		bool showPickedGPU = true;
 
 		
-
 		std::vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
 
-		
 
 		//------------------------Context.cpp------------------------
 		void createInstance();

@@ -54,7 +54,7 @@ namespace cubecraft {
 		auto formats = phyDevice.getSurfaceFormatsKHR(surface);
 		swapchainInfo.imageFormat = formats[0];
 		for (const auto& format : formats) {
-			if (format.format == vk::Format::eR8G8B8A8Srgb &&
+			if (format.format == vk::Format::eB8G8R8A8Srgb &&
 				format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 				swapchainInfo.imageFormat = format;
 				break;

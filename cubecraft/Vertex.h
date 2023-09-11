@@ -33,4 +33,9 @@ namespace cubecraft {
             return attributeDescriptions;
         }
     };
+
+    struct Vertices
+    {
+        Vertex vertices[4];
+    };
 }

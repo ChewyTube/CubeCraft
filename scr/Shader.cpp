@@ -26,16 +26,20 @@ namespace cubecraft {
 
 	void Shader::initDescriptorSetLayouts() {
 		vk::DescriptorSetLayoutCreateInfo createInfo;
-		std::vector<vk::DescriptorSetLayoutBinding> bindings(2);
+		std::vector<vk::DescriptorSetLayoutBinding> bindings(1);
 		bindings[0].setBinding(0)
 			.setDescriptorCount(1)
 			.setDescriptorType(vk::DescriptorType::eUniformBuffer)
 			.setStageFlags(vk::ShaderStageFlagBits::eVertex);
-		bindings[1].setBinding(1) 
+		createInfo.setBindings(bindings);
+
+		layouts_.push_back(Context::Instance().device.createDescriptorSetLayout(createInfo));
+
+		bindings.resize(1);
+		bindings[0].setBinding(0)
 			.setDescriptorCount(1)
 			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
 			.setStageFlags(vk::ShaderStageFlagBits::eFragment);
-
 		createInfo.setBindings(bindings);
 
 		layouts_.push_back(Context::Instance().device.createDescriptorSetLayout(createInfo));

@@ -91,15 +91,19 @@ int main() {
         cubecraft::Init(window);
         auto renderer = cubecraft::Context::Instance().GetRenderer();
 
+        cubecraft::Texture* texture = cubecraft::LoadTexture("resources/dirt.png");
+
         while (!glfwWindowShouldClose(window)) {
             renderer->StartRender();
-            renderer->render();
+            renderer->DrawTexture(*texture);
             renderer->EndRender();
 
             processInput(window);
             glfwPollEvents();
         }
         
+        cubecraft::DestroyTexture(texture);
+
         cubecraft::Quit();
     }
     catch (const std::exception& e) {

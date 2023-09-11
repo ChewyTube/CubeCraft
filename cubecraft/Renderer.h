@@ -19,8 +19,7 @@ namespace cubecraft {
 		void StartRender();
 		void EndRender();
 
-		//void DrawTexture(const Rect& rect, Texture& texture);
-		void render();
+		void DrawTexture(Texture& texture);
 	private:
 		struct MVP {
 			glm::mat4 model = glm::mat4(1.0f);
@@ -43,10 +42,10 @@ namespace cubecraft {
 		std::unique_ptr<Buffer> indicesBuffer_;
 
 		vk::DescriptorPool descriptorPool_;
-		std::vector<vk::DescriptorSet> sets_;
+
+		std::vector<DescriptorSetManager::SetInfo> descriptorSets_;
 
 		std::unique_ptr<Texture> texture;
-		vk::Sampler sampler;
 
 		void createSems();
 		void createFence();
@@ -54,7 +53,6 @@ namespace cubecraft {
 		void createBuffers();
 		void createUniformBuffers();
 		void createTexture();
-		void createSampler();
 		void bufferVertexData();
 		void bufferIndicesData();
 		void bufferMVPData();
@@ -63,7 +61,6 @@ namespace cubecraft {
 
 		void createDescriptorPool();
 		std::vector<vk::DescriptorSet> allocDescriptorSet(int maxFlight);
-		void allocDescriptorSets();
 		void updateDescriptorSets();
 
 		void copyBuffer(vk::Buffer& src, vk::Buffer& dst, size_t size, size_t srcOffset, size_t dstOffset);
