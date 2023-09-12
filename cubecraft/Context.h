@@ -21,8 +21,8 @@ namespace cubecraft{
 
 	const uint32_t WIDTH = 800;
 	const uint32_t HEIGHT = 600;
-	const std::string vertPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\vert.spv";
-	const std::string fragPath = "D:\\Vulkan\\Program\\CubeCraft\\shaders\\frag.spv";
+	const std::string vertPath = "shaders\\vert.spv";
+	const std::string fragPath = "shaders\\frag.spv";
 
 
 	class Context final{
