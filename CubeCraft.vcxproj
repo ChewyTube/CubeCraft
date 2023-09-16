@@ -137,14 +137,17 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="scr\Block.cpp" />
     <ClCompile Include="scr\Buffer.cpp" />
     <ClCompile Include="scr\CommandManager.cpp" />
     <ClCompile Include="scr\Context.cpp" />
+    <ClCompile Include="scr\DescriptorSetManager.cpp" />
     <ClCompile Include="scr\Layers.cpp" />
     <ClCompile Include="scr\Renderer.cpp" />
     <ClCompile Include="scr\RenderProcess.cpp" />
     <ClCompile Include="scr\Shader.cpp" />
     <ClCompile Include="scr\SwapChain.cpp" />
+    <ClCompile Include="scr\Texture.cpp" />
     <ClCompile Include="scr\Utils\ReadWholeFile.cpp" />
     <ClCompile Include="scr\Vertex.cpp" />
     <ClCompile Include="Source\Utils\GetTimeStamp.cpp" />
@@ -158,15 +161,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\CubeCraft\CubeCraft\CubeCraft\Headers\Camera.h" />
+    <ClInclude Include="cubecraft\Block.h" />
     <ClInclude Include="cubecraft\Buffer.h" />
     <ClInclude Include="cubecraft\Camera.h" />
     <ClInclude Include="cubecraft\CommandManager.h" />
     <ClInclude Include="cubecraft\Context.h" />
     <ClInclude Include="cubecraft\CubeCraft.h" />
+    <ClInclude Include="cubecraft\DescriptorSetManager.h" />
+    <ClInclude Include="cubecraft\Maths\Position.h" />
     <ClInclude Include="cubecraft\Renderer.h" />
     <ClInclude Include="cubecraft\RenderProcess.h" />
     <ClInclude Include="cubecraft\Shader.h" />
     <ClInclude Include="cubecraft\SwapChain.h" />
+    <ClInclude Include="cubecraft\Texture.h" />
     <ClInclude Include="cubecraft\Uniform.h" />
     <ClInclude Include="cubecraft\Vertex.h" />
     <ClInclude Include="cubecraft\Utils\ReadWholeFile.h" />

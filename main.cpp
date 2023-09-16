@@ -95,7 +95,8 @@ int main() {
 
         while (!glfwWindowShouldClose(window)) {
             renderer->StartRender();
-            renderer->DrawTexture(*texture);
+            renderer->DrawTexture(*texture, {0, 0, 0}, cubecraft::Faces::UP);
+            renderer->DrawTexture(*texture, {0, 1, 0}, cubecraft::Faces::UP);
             renderer->EndRender();
 
             processInput(window);

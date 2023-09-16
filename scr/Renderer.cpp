@@ -93,10 +93,12 @@ namespace cubecraft {
 
         curFrame_ = (curFrame_ + 1) % maxFlightCount_;
     }
-    void Renderer::DrawTexture(Texture& texture) {
+    void Renderer::DrawTexture(Texture& texture, Position position, Faces face) {
         auto& cmd = cmdBufs_[curFrame_];
         auto& renderProcess = Context::Instance().renderProcess;
         
+        bufferVertexData(face, position.x, position.y, position.z);
+
         vk::DeviceSize offset = 0;
         cmd.bindVertexBuffers(0, verticesBuffer_->buffer, offset);
         cmd.bindIndexBuffer(indicesBuffer_->buffer, 0, vk::IndexType::eUint32);
@@ -154,7 +156,7 @@ namespace cubecraft {
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
     }
     void Renderer::bufferData() {
-        bufferVertexData();
+        bufferVertexData(Faces::UP, 0, 0, 0);
         bufferIndicesData();
     }
     void Renderer::createUniformBuffers() {
@@ -173,15 +175,9 @@ namespace cubecraft {
                 vk::MemoryPropertyFlagBits::eDeviceLocal));
         }
     }
-    void Renderer::bufferVertexData(){
-        const Vertex vertices1[4] = {
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f,  -0.5f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f,  0.5f,  0.0f}, {1.0f, 1.0f}},
-            {{-0.5f, 0.5f,  0.0f}, {0.0f, 1.0f}},
-        };
-        auto face = DOWN;
-        const Vertex vertices[4] = { getVertices(face, 0, 0, 0)[0], getVertices(face, 0, 0, 0)[1], getVertices(face, 0, 0, 0)[2], getVertices(face, 0, 0, 0)[3] };
+    void Renderer::bufferVertexData(Faces face, int x, int y, int z){
+        auto v = getVertices(face, x, y, z);
+        const Vertex vertices[4] = { v[0], v[1], v[2], v[3] };
         //vertices = getVertices(UP, 0, 0, 0).vertices;
         auto& device = Context::Instance().device;
         memcpy(verticesBuffer_->map, vertices, sizeof(vertices));
@@ -216,7 +212,7 @@ namespace cubecraft {
     }
 
     void Renderer::createTexture() {
-        texture.reset(new Texture("D:/Vulkan/Program/CubeCraft/resources/dirt.png"));
+        texture.reset(new Texture("resources/dirt.png"));
     }
 
     void Renderer::createDescriptorPool() {

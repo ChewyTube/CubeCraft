@@ -54,6 +54,15 @@
     <ClCompile Include="scr\Buffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="scr\Texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\DescriptorSetManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="scr\Block.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\compile.bat">
@@ -111,6 +120,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="cubecraft\Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\DescriptorSetManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Block.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cubecraft\Maths\Position.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

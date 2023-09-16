@@ -9,6 +9,8 @@
 #include "Buffer.h"
 #include "Uniform.h"
 #include "Texture.h"
+#include "Block.h"
+#include "Maths/Position.h"
 
 namespace cubecraft {
 	class Renderer final {
@@ -19,7 +21,7 @@ namespace cubecraft {
 		void StartRender();
 		void EndRender();
 
-		void DrawTexture(Texture& texture);
+		void DrawTexture(Texture& texture, Position position, Faces face);
 	private:
 		struct MVP {
 			glm::mat4 model = glm::mat4(1.0f);
@@ -53,7 +55,7 @@ namespace cubecraft {
 		void createBuffers();
 		void createUniformBuffers();
 		void createTexture();
-		void bufferVertexData();
+		void bufferVertexData(Faces face, int x, int y, int z);
 		void bufferIndicesData();
 		void bufferMVPData();
 
