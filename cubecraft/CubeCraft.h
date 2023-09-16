@@ -30,6 +30,8 @@ namespace cubecraft {
 		Context::Instance().renderProcess.reset();
 		Context::Instance().swapChain.reset();
 
+		DescriptorSetManager::Quit();
+
 		Context::Quit();
 	}
 

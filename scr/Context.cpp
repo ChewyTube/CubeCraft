@@ -18,6 +18,7 @@ namespace cubecraft {
 		InitVulkan(window);
 	}
 	Context::~Context() {
+		device.destroySampler(sampler);
 		device.destroy();
 		instance.destroy();
 	}

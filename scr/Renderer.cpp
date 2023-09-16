@@ -19,7 +19,6 @@ namespace cubecraft {
 	}
 	Renderer::~Renderer() {
 		auto& device = Context::Instance().device;
-        texture.reset();
         device.destroyDescriptorPool(descriptorPool_);
         verticesBuffer_.reset();
         indicesBuffer_.reset();
